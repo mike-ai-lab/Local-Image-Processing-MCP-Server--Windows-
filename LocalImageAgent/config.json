@@ -1,0 +1,25 @@
+﻿{
+    "imagemagick_path":  "C:\\Program Files\\ImageMagick-7.1.1-Q16-HDRI",
+    "magick_exe":  "C:\\Program Files\\ImageMagick-7.1.1-Q16-HDRI\\magick.exe",
+    "server_name":  "local-image-agent",
+    "server_version":  "1.0.0",
+    "log_level":  "INFO",
+    "supported_input_formats":  [
+                                    "jpg",
+                                    "jpeg",
+                                    "png",
+                                    "tiff",
+                                    "bmp",
+                                    "gif",
+                                    "webp",
+                                    "avif"
+                                ],
+    "supported_output_formats":  [
+                                     "jpg",
+                                     "png",
+                                     "tiff",
+                                     "bmp",
+                                     "webp",
+                                     "avif"
+                                 ]
+}

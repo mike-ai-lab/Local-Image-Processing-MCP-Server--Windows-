@@ -1,0 +1,96 @@
+[03:54:56] INFO     Starting local-image-agent v1.0.0           main_http.py:76
+           INFO     Local endpoint: http://127.0.0.1:8765/mcp   main_http.py:77
+           INFO     ChatGPT URL (via ngrok):                    main_http.py:78
+                    https://<ngrok-host>/mcp                                   
+
+
++-----------------------------------------------------------------------------+
+|                                                                             |
+|                                                                             |
+|                        \u2584\u2580\u2580 \u2584\u2580\u2588 \u2588\u2580\u2580 \u2580\u2588\u2580 \u2588\u2580\u2584\u2580\u2588 \u2588\u2580\u2580 \u2588\u2580\u2588                        |
+|                        \u2588\u2580  \u2588\u2580\u2588 \u2584\u2584\u2588  \u2588  \u2588 \u2580 \u2588 \u2588\u2584\u2584 \u2588\u2580\u2580                        |
+|                                                                             |
+|                                                                             |
+|                                                                             |
+|                                FastMCP 3.4.4                                |
+|                            https://gofastmcp.com                            |
+|                                                                             |
+|                 \U0001f5a5  Server:      local-image-agent, 1.0.0                    |
+|                 \U0001f680 Deploy free: https://horizon.prefect.io                  |
+|                                                                             |
++-----------------------------------------------------------------------------+
+
+
+[07/20/26 03:54:56] INFO     Starting MCP server               transport.py:361
+                             'local-image-agent' with                          
+                             transport 'streamable-http' on                    
+                             http://127.0.0.1:8765/mcp                         
+INFO:     Started server process [10180]
+INFO:     Waiting for application startup.
+           INFO     StreamableHTTP session       streamable_http_manager.py:131
+                    manager started                                            
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+[03:55:42] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    4436ae37fd75490facac1f25931f                               
+                    7324                                                       
+           INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    2932c50c461a4180b56a9f692833                               
+                    11b9                                                       
+[03:55:44] INFO     Processing request of type ListToolsRequest   server.py:733
+           INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    2792da8d35504a67855f3b0c0869                               
+                    5185                                                       
+[03:55:45] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    8d60a34cbaca45e6abaf7cb00aaf                               
+                    724b                                                       
+[03:55:46] INFO     Processing request of type                    server.py:733
+                    ListResourcesRequest                                       
+[03:55:47] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    ffcf6495b50f40ceb9678603c613                               
+                    802d                                                       
+[03:55:48] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    a71caad14e614fbcb2b253cccf4d                               
+                    6b9d                                                       
+[03:55:49] INFO     Processing request of type ListToolsRequest   server.py:733
+[03:55:50] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    3e81d969dcc449589c860f2e44d5                               
+                    2be3                                                       
+           INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    6e2293f18f9046cb81bed432061a                               
+                    f83b                                                       
+[03:55:51] INFO     Processing request of type                    server.py:733
+                    ListResourcesRequest                                       
+[03:58:08] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    a56867fbb81a40d8b6cbde2da335                               
+                    3d05                                                       
+[03:58:09] INFO     Processing request of type CallToolRequest    server.py:733
+[03:58:17] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    1d8397183d5847dfbae5a0dd6b7a                               
+                    b168                                                       
+[03:58:18] INFO     Processing request of type CallToolRequest    server.py:733
+[03:58:21] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    3d404048e7f6483cb841e09496eb                               
+                    6fe0                                                       
+[03:58:22] INFO     Processing request of type CallToolRequest    server.py:733
+[03:58:24] WARNING  Could not achieve target size 10240 bytes     process.py:55
+                    even at quality 1. Final size: 285707 bytes.               
+           INFO     compress_image: IMG-PROCESOR-MCP_stripped.png \u2192 tools.py:64
+                    IMG-PROCESOR-MCP_under10kb.png (-2429.5%                   
+                    reduction)                                                 
+[03:58:32] INFO     Created new transport with   streamable_http_manager.py:281
+                    session ID:                                                
+                    1b383c8ece7d4f539300b49f1bb6                               
+                    ec1e                                                       
+[03:58:33] INFO     Processing request of type CallToolRequest    server.py:733
