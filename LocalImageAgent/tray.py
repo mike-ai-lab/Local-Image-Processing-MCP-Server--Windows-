@@ -184,15 +184,19 @@ def _quit(icon: pystray.Icon) -> None:
 # ---------------------------------------------------------------------------
 
 def _watchdog(icon: pystray.Icon) -> None:
+    """Restart server/ngrok if either crashes or drops after sleep."""
     while True:
         time.sleep(10)
         with _lock:
             sp = _server_proc
             np = _ngrok_proc
-        if sp is not None and sp.poll() is not None:
-            # Server died — restart
-            threading.Thread(target=start_server, args=(icon,), daemon=True).start()
-        elif np is not None and np.poll() is not None:
+        # Only watch if we're supposed to be running
+        if sp is None:
+            continue
+        server_dead = sp.poll() is not None
+        ngrok_dead  = np is not None and np.poll() is not None
+        port_gone   = _port_free(8765)
+        if server_dead or ngrok_dead or port_gone:
             threading.Thread(target=start_server, args=(icon,), daemon=True).start()
 
 

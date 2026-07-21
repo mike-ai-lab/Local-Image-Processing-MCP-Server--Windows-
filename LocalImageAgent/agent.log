@@ -1,0 +1,383 @@
+2026-07-20 12:30:13  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 12:30:13  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 12:30:13  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 12:30:13  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 12:30:45  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: cfebbf17b10a4aa99e341048dd2080b4
+2026-07-20 12:30:46  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ac2d8859473046149d8186e818f00d86
+2026-07-20 12:30:46  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-20 12:30:47  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 1c7a678d99794bd5bcaa27adcd35601f
+2026-07-20 12:30:48  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 6596c663fcd140c3b3406ddf067528ad
+2026-07-20 12:30:49  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-20 12:31:43  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0d39180ea7a24f7e8205eaef3f0aa5c7
+2026-07-20 12:31:44  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 12:31:44  INFO      local-image-agent  [START] find_files C:\Users\Administrator name='STC-CRYSTAL-MALL-JEDDAH-FOR-D5-2*'
+2026-07-20 12:32:14  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator name='STC-CRYSTAL-MALL-JEDDAH-FOR-D5-2*'  (30.000s)
+2026-07-20 12:56:53  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 12:56:53  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 12:56:53  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 12:56:53  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 12:57:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 27a5295d153e4eea9b083a71a971fbfd
+2026-07-20 12:57:25  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: d6007ab25cc149bdbfb187272e29a144
+2026-07-20 12:57:26  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-20 12:57:26  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 66f8da4ee5954a029e0dcdb6e9495fde
+2026-07-20 12:57:27  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 1758b10286fa45f0a177db084fe50b50
+2026-07-20 12:57:28  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-20 13:00:56  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 99c1ba0213a0424189d7034ba99df9b3
+2026-07-20 13:00:57  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 47d1ceb763ce450888cd752d29e845d1
+2026-07-20 13:00:58  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:01:05  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c82a7cd754b5465c975e813d7946eae9
+2026-07-20 13:01:06  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:02:30  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 81dab807616c444ca2dafa11dbadafa7
+2026-07-20 13:02:31  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:06:27  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 13:06:27  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 13:06:27  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 13:06:27  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 13:06:30  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 13:06:30  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 13:06:30  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 13:06:31  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 13:06:31  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager shutting down
+2026-07-20 13:06:40  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 13:06:40  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 13:06:40  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 13:06:41  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 13:06:54  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: cebfbc2878734d558d697c8049483b2b
+2026-07-20 13:06:54  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: bc2730cac0ad4e6db5c847c3f765f794
+2026-07-20 13:06:55  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-20 13:06:56  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0011dbe642474a9fb9eff76a98571e77
+2026-07-20 13:06:57  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 8a9a42fcdda644f98bf09993ec8c973c
+2026-07-20 13:06:58  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-20 13:07:39  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: eb20bf0f8c7945d9a775eb2fa0ef9f5d
+2026-07-20 13:07:39  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:07:39  INFO      local-image-agent  [START] read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)
+2026-07-20 13:07:40  INFO      local-image-agent  [DONE]  read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)  (0.735s)
+2026-07-20 13:10:34  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ec309e124f184d39a8de403378a1c0c8
+2026-07-20 13:10:35  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:10:35  INFO      local-image-agent  [START] read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)
+2026-07-20 13:10:36  INFO      local-image-agent  [DONE]  read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)  (0.691s)
+2026-07-20 13:11:16  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 2f65c46bb11546d4adc956d3fd200970
+2026-07-20 13:11:17  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:11:17  INFO      local-image-agent  [START] read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)
+2026-07-20 13:11:18  INFO      local-image-agent  [DONE]  read_folder_for_vision TESTING-IMAGES-WebP (15/15 images, sort=name)  (0.708s)
+2026-07-20 13:12:05  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 5e5146291b5847f8a4d52873511c4035
+2026-07-20 13:12:06  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:12:09  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: db108f4666a74038a8c167d573205d9e
+2026-07-20 13:12:10  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:12:10  INFO      local-image-agent  [START] read_image_for_vision 1.webp
+2026-07-20 13:12:10  INFO      local-image-agent  [DONE]  read_image_for_vision 1.webp  (0.053s)
+2026-07-20 13:12:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: d023fe18983f4523bc35e68117ae7a05
+2026-07-20 13:12:24  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:12:24  INFO      local-image-agent  [START] read_image_for_vision STC-1.webp
+2026-07-20 13:12:24  INFO      local-image-agent  [DONE]  read_image_for_vision STC-1.webp  (0.070s)
+2026-07-20 13:12:43  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 003893eef12c44e2b6551e6837cdb273
+2026-07-20 13:12:44  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:12:44  INFO      local-image-agent  [START] read_image_for_vision STC-2.webp
+2026-07-20 13:12:44  INFO      local-image-agent  [DONE]  read_image_for_vision STC-2.webp  (0.073s)
+2026-07-20 13:12:55  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: fad96813af984178a2016edc7ce31da9
+2026-07-20 13:12:56  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:12:56  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done.webp
+2026-07-20 13:12:56  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done.webp  (0.059s)
+2026-07-20 13:13:10  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: f0cddcde60374bccb89230287daf5977
+2026-07-20 13:13:11  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:13:11  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done11.webp
+2026-07-20 13:13:11  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done11.webp  (0.045s)
+2026-07-20 13:13:17  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 840ebc73521f45cf9bc20bc686a20fa2
+2026-07-20 13:13:18  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:13:18  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done111.webp
+2026-07-20 13:13:18  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done111.webp  (0.047s)
+2026-07-20 13:13:32  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: e4f5dabe262b490c85c646892e96fdbc
+2026-07-20 13:13:33  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:13:33  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done2.webp
+2026-07-20 13:13:33  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done2.webp  (0.046s)
+2026-07-20 13:13:41  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 21f502bbdfbf476996df0e4180b8a970
+2026-07-20 13:13:42  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:13:42  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done3.webp
+2026-07-20 13:13:42  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done3.webp  (0.051s)
+2026-07-20 13:13:53  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 3ed0083b3bff467cac7e564982634bc6
+2026-07-20 13:13:54  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:13:54  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done4.webp
+2026-07-20 13:13:54  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done4.webp  (0.058s)
+2026-07-20 13:14:00  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 4e1295d4d0194211ab7a29a5621ec051
+2026-07-20 13:14:01  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:01  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done5.webp
+2026-07-20 13:14:01  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done5.webp  (0.053s)
+2026-07-20 13:14:08  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ff325519231146fab10f066e0b572c1c
+2026-07-20 13:14:09  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:09  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done6.webp
+2026-07-20 13:14:09  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done6.webp  (0.053s)
+2026-07-20 13:14:23  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ce920971ffee46a3b648d9289a6cb79c
+2026-07-20 13:14:24  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:24  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done7.webp
+2026-07-20 13:14:24  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done7.webp  (0.051s)
+2026-07-20 13:14:31  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: dda768d8a3f14baaa9e4297bad20a695
+2026-07-20 13:14:32  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:32  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done77.webp
+2026-07-20 13:14:32  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done77.webp  (0.058s)
+2026-07-20 13:14:49  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: e15348831aed48f3bda6af485e843261
+2026-07-20 13:14:50  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:50  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done8.webp
+2026-07-20 13:14:50  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done8.webp  (0.046s)
+2026-07-20 13:14:56  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 8d36026739ce418fb660b988b7a6a45e
+2026-07-20 13:14:57  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:14:57  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done9.webp
+2026-07-20 13:14:57  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done9.webp  (0.067s)
+2026-07-20 13:19:43  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 1b9c42e4db9645898aa6d55054d901e5
+2026-07-20 13:19:44  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 13:19:44  INFO      local-image-agent  [START] read_image_for_vision stc-NEW-almost-done8.webp
+2026-07-20 13:19:44  INFO      local-image-agent  [DONE]  read_image_for_vision stc-NEW-almost-done8.webp  (0.030s)
+2026-07-20 17:53:57  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 17:53:57  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 17:53:57  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 17:54:00  INFO      httpx  HTTP Request: GET https://pypi.org/pypi/fastmcp/json "HTTP/1.1 200 OK"
+2026-07-20 17:54:01  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 17:54:02  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 17:54:02  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 17:54:02  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 17:54:02  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 17:54:02  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager shutting down
+2026-07-20 17:54:19  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-20 17:54:19  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-20 17:54:19  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-20 17:54:19  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-20 17:57:00  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c66819370e3e476e95b023c59af7627a
+2026-07-20 17:57:02  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 4f86ef4a4dab4a71be2b13195ed04387
+2026-07-20 17:57:03  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 16e483a51bbb4f3a941a6570c50098a6
+2026-07-20 17:57:04  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:57:04  INFO      local-image-agent  [START] find_files C:\Users\Administrator\AppData name='*.log'
+2026-07-20 17:57:04  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator\AppData name='*.log'  (0.280s)
+2026-07-20 17:57:08  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0eadcfee5d924f4f9cdcd48aa2690a0a
+2026-07-20 17:57:11  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:57:11  INFO      local-image-agent  [START] find_files C:\Users\Administrator name='*SketchUp*.log'
+2026-07-20 17:57:37  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator name='*SketchUp*.log'  (26.189s)
+2026-07-20 17:57:42  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: af6ef96d02834d68b4f0883c3b416575
+2026-07-20 17:57:43  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:57:43  INFO      local-image-agent  [START] read_file C:\Users\Administrator\AppData\Local\Temp\SketchUpLog-2026-07-20-15_32_14.log
+2026-07-20 17:57:43  INFO      local-image-agent  [DONE]  read_file C:\Users\Administrator\AppData\Local\Temp\SketchUpLog-2026-07-20-15_32_14.log  (0.004s)
+2026-07-20 17:57:49  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: e0d5bd401fe44b3f9466d39eb0b95e9d
+2026-07-20 17:57:51  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:57:51  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Local\Autodesk\CER query='SketchUp' pattern=*.log
+2026-07-20 17:57:51  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Local\Autodesk\CER query='SketchUp' pattern=*.log  (0.106s)
+2026-07-20 17:57:54  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 5cb32f9b05794ff886b5b4b711dbbae1
+2026-07-20 17:57:57  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:57:57  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Local\Temp query='V-Ray' pattern=*.log
+2026-07-20 17:57:57  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Local\Temp query='V-Ray' pattern=*.log  (0.048s)
+2026-07-20 17:58:00  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 65e5fa6456714f8e8bf379396bf9f7a2
+2026-07-20 17:58:02  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:58:02  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Roaming query='vray' pattern=*.log
+2026-07-20 17:58:27  WARNING   local-image-agent  search_in_files timed out after 25s scanning C:\Users\Administrator\AppData\Roaming
+2026-07-20 17:58:27  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Roaming query='vray' pattern=*.log  (25.028s)
+2026-07-20 17:59:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 46012cb547f8445a9d9bc9f1408351a0
+2026-07-20 17:59:26  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:59:26  INFO      local-image-agent  [START] find_files C:\Users\Administrator\AppData\Local name='*SketchUp*'
+2026-07-20 17:59:27  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator\AppData\Local name='*SketchUp*'  (1.606s)
+2026-07-20 17:59:33  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 8412ea080bc042ecb8c560165ab7b5bf
+2026-07-20 17:59:34  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:59:34  INFO      local-image-agent  [START] find_files C:\Users\Administrator\AppData\Local name='*V-Ray*.log'
+2026-07-20 17:59:47  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator\AppData\Local name='*V-Ray*.log'  (13.163s)
+2026-07-20 17:59:52  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 954e04661dec4aad9b75d0b09ee7c2fb
+2026-07-20 17:59:53  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 17:59:53  INFO      local-image-agent  [START] find_files C:\Users\Administrator\AppData name='*.wer'
+2026-07-20 18:00:11  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator\AppData name='*.wer'  (17.696s)
+2026-07-20 18:00:21  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 3d140f23f895422080287ed7df59828c
+2026-07-20 18:00:23  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:00:23  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Local\CrashDumps query='Exception' pattern=*.dmp
+2026-07-20 18:00:23  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Local\CrashDumps query='Exception' pattern=*.dmp  (0.399s)
+2026-07-20 18:00:27  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 1a6c4312d87c45b8bd1cac3726465567
+2026-07-20 18:00:29  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:00:29  INFO      local-image-agent  [START] read_file C:\Users\Administrator\AppData\Local\Temp\SketchUpLog-2026-07-20-15_32_14.log
+2026-07-20 18:00:29  INFO      local-image-agent  [DONE]  read_file C:\Users\Administrator\AppData\Local\Temp\SketchUpLog-2026-07-20-15_32_14.log  (0.002s)
+2026-07-20 18:00:34  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c4c1ecfb74a54f4c828f32558946dd64
+2026-07-20 18:00:35  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:00:35  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Local\CrashDumps query='V-Ray' pattern=*.dmp
+2026-07-20 18:00:35  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Local\CrashDumps query='V-Ray' pattern=*.dmp  (0.140s)
+2026-07-20 18:00:41  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: f2e3be08ef964641a0f28e104406ba8e
+2026-07-20 18:00:42  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:00:42  INFO      local-image-agent  [START] find_files C:\ProgramData name='*SketchUp*'
+2026-07-20 18:00:48  INFO      local-image-agent  [DONE]  find_files C:\ProgramData name='*SketchUp*'  (6.150s)
+2026-07-20 18:00:53  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: bfd5242bd16446d289e968655df0c179
+2026-07-20 18:00:54  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:00:54  INFO      local-image-agent  [START] find_files C:\Users\Administrator\AppData\Local\CrashDumps name='SketchUp.exe*.dmp'
+2026-07-20 18:00:54  INFO      local-image-agent  [DONE]  find_files C:\Users\Administrator\AppData\Local\CrashDumps name='SketchUp.exe*.dmp'  (0.005s)
+2026-07-20 18:00:59  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: fcc150103bb24043997e2bfdc2dc3ffc
+2026-07-20 18:01:00  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 18:01:00  INFO      local-image-agent  [START] search_files C:\Users\Administrator\AppData\Local\Temp query='vray' pattern=*.txt
+2026-07-20 18:01:00  INFO      local-image-agent  [DONE]  search_files C:\Users\Administrator\AppData\Local\Temp query='vray' pattern=*.txt  (0.023s)
+2026-07-20 20:58:02  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0807520dda064484828456431b9e85fa
+2026-07-20 20:58:03  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 763e349bbac74001a2a8f7be3bc1628c
+2026-07-20 20:58:04  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 20:58:08  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: d7fd896039144b1fa26a4592498e3322
+2026-07-20 20:58:09  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 21:00:19  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 07c3c5c98f2b47d4bbf2fe6f11d06db5
+2026-07-20 21:00:20  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-20 21:00:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c49d8ef186994f2a9ae356f946fd8a6e
+2026-07-20 21:00:25  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:02:47  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 00:02:47  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 00:02:47  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 00:02:47  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 00:04:20  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 00:04:20  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 00:04:20  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 00:04:20  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 00:05:09  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ea2760c9ebf2416d9dad254462ce2cbd
+2026-07-21 00:05:10  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 23cf39041928425387a8fbd048150bef
+2026-07-21 00:05:11  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 00:05:12  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: d5ca11e5f5d94f24ad8603ae7db78426
+2026-07-21 00:05:12  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 4c0ce7e4ba78494bac567f0f753f1142
+2026-07-21 00:05:13  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 00:19:38  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 13b9db144b9848ad9667906863ae7357
+2026-07-21 00:19:39  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 678dcfd5cd7b4661879f75cbe8eec5ea
+2026-07-21 00:19:40  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:19:40  INFO      local-image-agent  [START] sketchup:generate_scene_report
+2026-07-21 00:19:40  INFO      local-image-agent  [DONE]  sketchup:generate_scene_report  (0.050s)
+2026-07-21 00:24:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: f6e71e9fc4b24eb1a4240fee003c3716
+2026-07-21 00:24:25  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:24:25  INFO      local-image-agent  [START] sketchup:create_vray_material
+2026-07-21 00:24:25  INFO      local-image-agent  [DONE]  sketchup:create_vray_material  (0.023s)
+2026-07-21 00:39:06  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 00:39:06  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 00:39:06  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 00:39:06  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 00:40:40  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c0aa36e76c374977a9e6da168e8609d9
+2026-07-21 00:40:41  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: cd4d2f75843541b6ad3134009d9a0e9d
+2026-07-21 00:40:41  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 00:40:42  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 580551e853d0415f9b66fc1a97d4eef5
+2026-07-21 00:40:43  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c60baf89a87143a09c4e2c61c741b263
+2026-07-21 00:40:43  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 00:44:05  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 00:44:05  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 00:44:05  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 00:44:05  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 00:45:07  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: dfa2daf1a176423f8fd10a8af32cd1c7
+2026-07-21 00:45:08  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 841d2dbb0b4e4f19944207ff02e10664
+2026-07-21 00:45:09  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 00:45:09  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: e6ff24228b864988a34bf1d8e2a9d47a
+2026-07-21 00:45:10  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 4ec2071b38f942408c0f20f4da99e8fd
+2026-07-21 00:45:11  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 00:45:50  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ebdd99232f9648a3af98aa6bc4aed9a0
+2026-07-21 00:45:50  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 3da1b65b462045a2abd6b69cac8fbdd1
+2026-07-21 00:45:51  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:45:51  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 00:45:51  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.019s)
+2026-07-21 00:45:55  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: d82cc8e3af49438083078ea6ce77da73
+2026-07-21 00:45:56  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:45:56  INFO      local-image-agent  [START] sketchup:material_assistant
+2026-07-21 00:45:56  INFO      local-image-agent  [DONE]  sketchup:material_assistant  (0.025s)
+2026-07-21 00:49:47  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 15e318524c33484b83f3e723574ccef1
+2026-07-21 00:49:48  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:49:48  INFO      local-image-agent  [START] sketchup:material_assistant
+2026-07-21 00:49:48  INFO      local-image-agent  [DONE]  sketchup:material_assistant  (0.021s)
+2026-07-21 00:49:52  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 478e10c68a8e4db8ab78b718895d82bb
+2026-07-21 00:49:53  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 00:49:53  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 00:49:53  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.005s)
+2026-07-21 01:06:33  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 6e1f9192461c464e922ffa4aa39fd7ca
+2026-07-21 01:06:33  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 6f13cd24a7174f428a1bcccd9e1b2f18
+2026-07-21 01:06:34  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:06:34  INFO      local-image-agent  [START] sketchup:model_info
+2026-07-21 01:06:34  INFO      local-image-agent  [DONE]  sketchup:model_info  (0.010s)
+2026-07-21 01:06:39  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0d39591e342d4b418fe9f4c8dede0680
+2026-07-21 01:06:40  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:06:40  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 01:06:41  INFO      local-image-agent  [DONE]  sketchup:analyze_scene  (0.028s)
+2026-07-21 01:08:50  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 813dc65b18ae49cb961a8e1abdb03ec9
+2026-07-21 01:08:51  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:08:51  INFO      local-image-agent  [START] sketchup:prepare_scene
+2026-07-21 01:08:51  INFO      local-image-agent  [DONE]  sketchup:prepare_scene  (0.049s)
+2026-07-21 01:09:01  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 41e958e3ef8f48c9bb787cafc7dcfb06
+2026-07-21 01:09:02  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:09:02  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 01:09:02  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.068s)
+2026-07-21 01:21:31  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 01:21:31  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 01:21:31  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 01:21:31  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 01:22:16  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 583759afc76a4d94a7e5450fe8091d91
+2026-07-21 01:22:17  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0e9b4a48c6ea4c059f57407756f01527
+2026-07-21 01:22:18  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 01:22:18  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0777226328934a97ae6a03d20bcddb76
+2026-07-21 01:22:19  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 6ad3f3d3dd61430e882f161863a958d3
+2026-07-21 01:22:20  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 01:25:03  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 70634676b9f14f71915abe11aa4142cc
+2026-07-21 01:25:03  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:25:03  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 01:25:04  INFO      local-image-agent  [DONE]  sketchup:analyze_scene  (0.042s)
+2026-07-21 01:37:31  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 01:37:31  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 01:37:31  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 01:37:31  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 01:50:12  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 01:50:12  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 01:50:12  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 01:50:13  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 01:50:22  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 9c2231b220704f0aa6909cdccfbfbdf3
+2026-07-21 01:50:22  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 6ab675f538a04c658086a7fd3f865bba
+2026-07-21 01:50:23  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 01:50:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: ddf93181c62c47238750e4fc1529d749
+2026-07-21 01:50:24  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 07e727f9ebda47ebb4e8309f0236b9ac
+2026-07-21 01:50:25  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 01:52:02  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: cd51fa977ac44bfdaa44080c4afc9e3f
+2026-07-21 01:52:03  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:52:03  INFO      local-image-agent  [START] sketchup:model_info
+2026-07-21 01:52:03  INFO      local-image-agent  [DONE]  sketchup:model_info  (0.019s)
+2026-07-21 01:52:05  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 874b38bc71ab479fb314fac1793b3a87
+2026-07-21 01:52:06  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 01:52:06  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 01:52:49  ERROR     local-image-agent  [FAIL]  sketchup:analyze_scene  (42.606s) — [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-07-21 01:56:49  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 01:56:49  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 01:56:49  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 01:56:49  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 01:58:00  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0a9c401e12f546cd9321a8df34e22af2
+2026-07-21 01:58:01  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 93a960027f5542868d0f07e53916eb11
+2026-07-21 01:58:02  INFO      mcp.server.lowlevel.server  Processing request of type ListToolsRequest
+2026-07-21 01:58:03  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 0f9a7f297c164dcf9540a67569727def
+2026-07-21 01:58:03  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c71ee0e573464f15a0d0f98b747d32fa
+2026-07-21 01:58:04  INFO      mcp.server.lowlevel.server  Processing request of type ListResourcesRequest
+2026-07-21 02:00:02  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 7e8742b4c18c4e43aec3d5ceb8f08b4d
+2026-07-21 02:00:02  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:00:02  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 02:00:02  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.040s)
+2026-07-21 02:01:02  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 98e81e63940a4d42af93a7bd92b29d43
+2026-07-21 02:01:03  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:01:03  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 02:01:03  INFO      local-image-agent  [DONE]  sketchup:analyze_scene  (0.020s)
+2026-07-21 02:01:30  INFO      local-image-agent  Starting local-image-agent v1.0.0
+2026-07-21 02:01:30  INFO      local-image-agent  Local endpoint: http://127.0.0.1:8765/mcp
+2026-07-21 02:01:30  INFO      local-image-agent  ChatGPT URL (via ngrok): https://<ngrok-host>/mcp
+2026-07-21 02:01:30  INFO      mcp.server.streamable_http_manager  StreamableHTTP session manager started
+2026-07-21 02:03:26  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 435fa00e78ca4c0b8a20f7a7fb305c5c
+2026-07-21 02:03:28  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:03:30  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c7fa4007495f4e8889487c3a44dca712
+2026-07-21 02:03:31  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:03:31  INFO      local-image-agent  [START] sketchup:model_info
+2026-07-21 02:03:31  INFO      local-image-agent  [DONE]  sketchup:model_info  (0.018s)
+2026-07-21 02:03:40  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: c91bc2ea36624710876b755302e6fe91
+2026-07-21 02:03:41  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:03:41  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 02:03:41  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.021s)
+2026-07-21 02:03:42  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: cf5c3d3aa6d6462f9fabb8330ced8e16
+2026-07-21 02:03:43  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:03:43  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 02:03:43  INFO      local-image-agent  [DONE]  sketchup:analyze_scene  (0.037s)
+2026-07-21 02:04:41  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 86656bccbf8b4d03af5d371a946e5156
+2026-07-21 02:04:42  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:04:42  INFO      local-image-agent  [START] sketchup:model_info
+2026-07-21 02:04:42  INFO      local-image-agent  [DONE]  sketchup:model_info  (0.014s)
+2026-07-21 02:04:48  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: b347cd58df6746d2863180f016744071
+2026-07-21 02:04:50  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:04:50  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 02:04:50  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.050s)
+2026-07-21 02:04:51  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 7088f36f00ee4c7fb05285c6f6e6b6c4
+2026-07-21 02:04:52  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:04:52  INFO      local-image-agent  [START] sketchup:analyze_scene
+2026-07-21 02:04:52  INFO      local-image-agent  [DONE]  sketchup:analyze_scene  (0.023s)
+2026-07-21 02:06:27  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: 7cb251a591ea465880521d5c63b69ec2
+2026-07-21 02:06:28  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:06:28  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 02:06:28  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.010s)
+2026-07-21 02:22:18  INFO      mcp.server.streamable_http_manager  Created new transport with session ID: a3decc3783d04fee998dc1e141d24012
+2026-07-21 02:22:19  INFO      mcp.server.lowlevel.server  Processing request of type CallToolRequest
+2026-07-21 02:22:19  INFO      local-image-agent  [START] sketchup:ruby
+2026-07-21 02:22:19  INFO      local-image-agent  [DONE]  sketchup:ruby  (0.025s)
