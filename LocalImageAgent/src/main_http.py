@@ -27,7 +27,7 @@ import video_tools as _vtools
 import file_tools as _ftools
 import vision_tools as _vision
 import sketchup_tools as _su
-from sketchup_bridge import run_ruby_json, run_ruby, SketchUpNotRunning, SketchUpError
+from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchUpNotRunning, SketchUpError
 
 
 # ---------------------------------------------------------------------------
@@ -596,6 +596,151 @@ def sketchup_get_model_info() -> dict:
 
 
 @mcp.tool()
+def sketchup_get_scene_info() -> dict:
+    """
+    Get comprehensive information about the current SketchUp scene:
+    model name, face/edge counts, all components with positions, all groups,
+    materials with colors, layers, and camera state.
+    Use this for a full scene overview before planning any operations.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation("sketchup:get_scene_info"):
+            return send_named_command("get_scene_info")
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_get_selection() -> dict:
+    """
+    Get all currently selected entities in SketchUp with their IDs, types,
+    names and positions. Use before transform or material operations to
+    confirm which entities are targeted.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation("sketchup:get_selection"):
+            result = send_named_command("get_selection")
+            return {"selection": result, "count": len(result) if isinstance(result, list) else 0}
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_create_component(
+    type: str = "cube",
+    position: list[float] | None = None,
+    dimensions: list[float] | None = None,
+) -> dict:
+    """
+    Create a new 3D component in SketchUp.
+    type: cube | cylinder (more shapes via sketchup_ruby)
+    position: [x, y, z] in meters (default [0,0,0])
+    dimensions: [width, depth, height] in meters (default [1,1,1])
+    Returns the entity ID and position of the created component.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation(f"sketchup:create_component {type}"):
+            return send_named_command("create_component", {
+                "type": type,
+                "position": position or [0, 0, 0],
+                "dimensions": dimensions or [1, 1, 1],
+            })
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_delete_component(entity_id: str) -> dict:
+    """
+    Delete a component or group from SketchUp by its entity ID.
+    Get entity IDs from sketchup_get_scene_info or sketchup_get_model_info.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation(f"sketchup:delete_component {entity_id}"):
+            return send_named_command("delete_component", {"id": entity_id})
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_transform_component(
+    entity_id: str,
+    position: list[float] | None = None,
+    rotation: list[float] | None = None,
+    scale: list[float] | None = None,
+) -> dict:
+    """
+    Move, rotate, or scale a component/group by entity ID.
+    position: [x, y, z] in meters
+    rotation: [rx, ry, rz] in degrees
+    scale: [sx, sy, sz] as multipliers (e.g. [2,2,2] doubles size)
+    Any combination of the three can be applied in one call.
+    """
+    try:
+        from log_setup import timed_operation
+        args: dict = {"id": entity_id}
+        if position is not None:
+            args["position"] = position
+        if rotation is not None:
+            args["rotation"] = rotation
+        if scale is not None:
+            args["scale"] = scale
+        with timed_operation(f"sketchup:transform {entity_id}"):
+            return send_named_command("transform_component", args)
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_set_material(entity_id: str, material: str) -> dict:
+    """
+    Apply a material to a component or group by entity ID.
+    material: hex color (#ff0000), rgb string (rgb(255,0,0)), or named material.
+    Applies to the entity and all its faces.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation(f"sketchup:set_material {entity_id}"):
+            return send_named_command("set_material", {"id": entity_id, "material": material})
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_export_scene(format: str = "skp") -> dict:
+    """
+    Export the current SketchUp scene to a file.
+    format: skp (default) | dae | obj | stl
+    The file is saved alongside the current model file with an _export suffix.
+    The model must be saved at least once before exporting.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation(f"sketchup:export {format}"):
+            return send_named_command("export_scene", {"format": format})
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
 def sketchup_apply_material_to_component(
     component_name: str,
     color_rgb: list[int],
@@ -626,9 +771,15 @@ def sketchup_apply_material_to_component(
               found = []
               entities.each do |e|
                 if (e.is_a?(Sketchup::ComponentInstance) || e.is_a?(Sketchup::Group))
-                  n = e.is_a?(Sketchup::ComponentInstance) ? e.definition.name : e.name
+                  if e.is_a?(Sketchup::ComponentInstance)
+                    n = e.definition.name
+                    ch = e.definition.entities
+                  else
+                    n = e.name
+                    ch = e.entities
+                  end
                   found << e if n.downcase.include?(name.downcase)
-                  found += find_named(e.is_a?(Sketchup::ComponentInstance) ? e.definition.entities : e.entities, name)
+                  found += find_named(ch, name)
                 end
               end
               found
@@ -639,7 +790,11 @@ def sketchup_apply_material_to_component(
             m.start_operation("MCP Apply Material", true)
             faces_painted = 0
             targets.each do |target|
-              ents = target.is_a?(Sketchup::ComponentInstance) ? target.definition.entities : target.entities
+              if target.is_a?(Sketchup::ComponentInstance)
+                ents = target.definition.entities
+              else
+                ents = target.entities
+              end
               ents.grep(Sketchup::Face).each do |face|
                 face.material = mat
                 faces_painted += 1

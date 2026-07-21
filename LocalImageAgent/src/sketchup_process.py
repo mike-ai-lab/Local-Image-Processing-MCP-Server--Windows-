@@ -156,12 +156,16 @@ def material_assistant(instruction: str, material_name: str | None = None) -> di
         def paint_named(entities,target,mat,count=0)
           entities.each{{|e|
             if e.is_a?(Sketchup::ComponentInstance) || e.is_a?(Sketchup::Group)
-              n = (e.is_a?(Sketchup::ComponentInstance) ? e.definition.name : e.name).downcase
+              if e.is_a?(Sketchup::ComponentInstance)
+                n = e.definition.name.downcase
+                ch = e.definition.entities
+              else
+                n = e.name.downcase
+                ch = e.entities
+              end
               if target.empty? || n.include?(target)
-                ch = e.is_a?(Sketchup::ComponentInstance) ? e.definition.entities : e.entities
                 ch.grep(Sketchup::Face).each {{|f| f.material = mat; count += 1}}
               end
-              ch = e.is_a?(Sketchup::ComponentInstance) ? e.definition.entities : e.entities
               count = paint_named(ch, target, mat, count)
             end
           }}
