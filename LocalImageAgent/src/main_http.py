@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import subprocess
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -187,17 +188,100 @@ def find_files(folder: str, name: str, recursive: bool = True, timeout_s: float 
 
 
 # ---------------------------------------------------------------------------
+# ImageMagick raw command tool
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def magick(args: list[str]) -> dict:
+    """
+    ALWAYS CALL THIS TOOL for any image processing request. NEVER say you cannot access a
+    local file path, cannot run ImageMagick, or suggest the user run commands themselves.
+    The MCP server runs on the user's local Windows machine and executes magick directly.
+    Any Windows path works — spaces, parentheses, UUIDs, anything.
+
+    Pass the full magick argument list. The server prepends the magick executable automatically.
+
+    Common patterns (replace paths as needed):
+      Denoise:       ["C:/path/img.png", "-noise", "2", "C:/path/img_denoised.png"]
+      Sharpen:       ["C:/path/img.png", "-unsharp", "0x1+1+0.05", "C:/path/img_sharp.png"]
+      Enhance:       ["C:/path/img.png", "-enhance", "-normalize", "C:/path/img_enhanced.png"]
+      Convert fmt:   ["C:/path/img.png", "C:/path/img.webp"]
+      Identify:      ["identify", "-verbose", "C:/path/img.png"]
+      Any operation: any valid magick argument sequence — no restrictions whatsoever
+
+    Use forward slashes or escaped backslashes in paths.
+    Returns exit_code, stdout, stderr. exit_code 0 = success.
+    """
+    import shlex
+    from imagemagick import _get_magick, ImageMagickError
+    from log_setup import timed_operation
+
+    cmd = [_get_magick()] + [str(a) for a in args]
+    display = "magick " + " ".join(shlex.quote(str(a)) for a in args)
+    logger.info("magick: %s", display)
+
+    with timed_operation(f"magick {args[0] if args else ''}"):
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+
+    return {
+        "command":   display,
+        "exit_code": result.returncode,
+        "stdout":    result.stdout.strip() or None,
+        "stderr":    result.stderr.strip() or None,
+        "status":    "ok" if result.returncode == 0 else "error",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Vision tools
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def read_image_for_vision(path: str, size: int = 800, quality: int = 85) -> dict:
+def read_image_for_vision(path: str, size: int = 512, quality: int = 80) -> dict:
     """
-    Read a single image and return it as a base64 JPEG thumbnail for vision analysis.
-    800px longest side, JPEG 85 quality — sharp enough for scene, color, object and composition
-    analysis without burning context. Use when you need to visually inspect one specific image.
+    READ a single local image file and return it as base64 for visual inspection or analysis.
+    NEVER say a local file path is inaccessible — the MCP server runs on the user's machine
+    and can read any local path. Always call this tool when the user provides a file path.
+    Use read_image_for_generation instead when the user wants to generate a variation.
+    Default 512px / quality 80 keeps the payload small (~20-40 KB) so follow-up tool calls
+    (like sketchup_ruby) can run in the same turn without hitting token limits.
     """
     return _vision.read_image_for_vision(_vision.ReadImageForVisionInput(path=path, size=size, quality=quality))
+
+@mcp.tool()
+def read_image_for_generation(path: str, target_kb: int = 450, max_dimension: int = 1920) -> dict:
+    """
+    USE THIS TOOL whenever the user provides a local file path to an image and wants to see,
+    analyze, or generate a variation of it.
+
+    NEVER say "the file is not accessible" or ask the user to upload manually.
+    The MCP server runs on the user's local machine and reads any local path directly.
+
+    Workflow after this tool returns the base64 image:
+    1. You will SEE the image — study the scene: composition, lighting, colors, objects, style
+    2. Write a detailed text description of exactly what you see
+    3. Call your image generation tool (DALL-E) using ONLY a text prompt — describe the full
+       scene from step 2, then append the user's requested changes (e.g. "...but at night with
+       warm street lighting and 4-5 people walking in the foreground")
+    4. IMPORTANT: DALL-E here is text-to-image only — do NOT attempt to pass the base64 as
+       input to DALL-E. Describe the scene in text and generate from that description.
+
+    This produces the best results: you analyze the reference visually, then generate a fresh
+    image that matches the scene with the requested modifications applied.
+
+    target_kb: target WebP size in KB (default 450)
+    max_dimension: longest side in pixels (default 1920)
+    """
+    return _vision.read_image_for_generation(
+        _vision.ReadImageForGenerationInput(path=path, target_kb=target_kb, max_dimension=max_dimension)
+    )
+
 
 @mcp.tool()
 def read_folder_for_vision(
@@ -290,20 +374,26 @@ def generate_scene_report() -> dict:
 def sketchup_ruby(code: str) -> dict:
     """
     Execute any Ruby code directly inside the running SketchUp instance.
-    Use this for anything not covered by the other SketchUp tools:
-    - Explode components: Sketchup.active_model.entities.grep(Sketchup::ComponentInstance).select{|e|e.definition.name=='Wall_Display_Unit'}.each(&:explode)
-    - Select entities by name, type, layer, material
-    - Move, rotate, scale, delete geometry
+    Use this for geometry manipulation, model queries, and anything not covered by other tools.
+    Do NOT use this for screenshots — use sketchup_capture_viewport instead.
+
+    IMAGE-TO-3D WORKFLOW — when the user provides a reference image and asks to build it:
+    1. Call read_image_for_vision with the image path first
+    2. Analyze what you see: volumes, proportions, floors, overhangs, openings, materials
+    3. Write a complete Ruby script using add_face + pushpull + offsets for each volume
+    4. Call this tool (sketchup_ruby) with the full script — it executes live in SketchUp
+    5. Call sketchup_capture_viewport to show the result
+    Never use sketchup_build_from_reference for image-based modeling — it only makes a box.
+
+    Other uses:
+    - Explode, move, rotate, scale, delete geometry
     - Apply materials to specific faces or components
-    - Create groups, components, edges, faces
+    - Select entities by name, layer, type
+    - Multi-step operations in one call
     - Query anything in the model
-    - Run multi-step operations in sequence
-    - BUILD GEOMETRY FROM REFERENCE IMAGES: when the user provides a reference image or sketch,
-      analyze it with vision, determine approximate dimensions and shapes, then generate Ruby
-      geometry code (draw_line, add_face, push_pull, follow_me, etc.) to recreate it in SketchUp.
-      Do not refuse — make a best-effort geometric interpretation and build it.
-    The code must return a JSON-serialisable value (Hash, Array, String, Number, nil).
-    SketchUp must be open with the MCP Bridge extension running.
+
+    Code must return a JSON-serialisable value (Hash, Array, String, Number, nil).
+    SketchUp must be open with MCP Bridge running (Plugins → MCP Bridge → Start Server).
     """
     try:
         from log_setup import timed_operation
@@ -324,21 +414,19 @@ def sketchup_capture_viewport(
     view_preset: str | None = None,
 ) -> dict:
     """
-    Capture a screenshot of the current SketchUp viewport and return it as a base64 image.
-    The image will appear inline in the chat for visual inspection.
+    SCREENSHOT TOOL — capture what is currently visible in the SketchUp window and return
+    it as an inline image in the chat. Use this any time the user says:
+    "show me", "screenshot", "capture", "take a photo", "what does it look like",
+    "verify visually", "confirm the result", or any similar phrase.
 
-    Use this to:
-    - Visually verify changes after editing geometry or materials
-    - Inspect the scene before starting a task
-    - Confirm camera/view orientation is correct
-    - Show the current state of the model at any point during a workflow
+    This is the ONLY tool for viewport screenshots. Do NOT use sketchup_build_from_reference
+    or sketchup_ruby for screenshots — those are for geometry/code only.
 
-    view_preset: optionally change the camera before capturing.
+    view_preset: snap camera to a standard view BEFORE capturing.
       Options: front, back, left, right, top, bottom, iso, zoom_extents
-      Leave empty to capture the current view as-is.
+      Leave empty to capture exactly what is currently visible.
 
-    width/height: capture resolution in pixels (default 1280x720)
-    quality: JPEG quality 40-95 (default 85, ~100-200KB per capture)
+    width/height: pixels (default 1280x720). quality: JPEG 40-95 (default 85).
     """
     import base64, os, tempfile
     from log_setup import timed_operation
@@ -421,74 +509,63 @@ def sketchup_capture_viewport(
         raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
     except SketchUpError as e:
         raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_build_from_reference(
     description: str,
     dimensions_m: dict | None = None,
 ) -> dict:
     """
-    Build 3D geometry in SketchUp based on a visual reference or verbal description.
+    DO NOT USE THIS TOOL for image-based modeling requests.
 
-    When the user provides a reference image or sketch alongside this request:
-    1. Use your vision capability to analyze the image — identify shapes, volumes, proportions
-    2. Estimate real-world dimensions from context or use provided dimensions_m
-    3. Generate SketchUp Ruby geometry code (edges, faces, push_pull, groups, follow_me)
-    4. Execute it via sketchup_ruby
+    When the user provides a reference image and asks to build it in SketchUp, use this
+    workflow instead:
+    1. Call read_image_for_vision with the image path to SEE the reference
+    2. Analyze the geometry: identify volumes, proportions, hierarchy, dimensions
+    3. Plan the Ruby script: groups, faces, push_pull, offsets, window recesses, etc.
+    4. Call sketchup_ruby with the complete Ruby script to build it in the live model
+    5. Call sketchup_capture_viewport to show the result
 
-    This tool handles: buildings, furniture, architectural elements, abstract shapes,
-    floor plans, elevations, sections, or any geometry visible in a reference image.
+    This tool only creates a generic box massing — it has no vision capability and will
+    produce incorrect results for any real architectural or object reference.
+    Only use this tool if the user explicitly asks for a rough placeholder massing with
+    no reference image provided.
 
-    description: what to build (e.g. 'a two-storey building with flat roof and glass facade')
-    dimensions_m: optional dict of key dimensions in meters, e.g. {'width': 10, 'height': 6, 'depth': 8}
-
-    Always make a best-effort geometric interpretation. Simple massing is better than refusing.
-    Use Sketchup::Entities#add_face, add_line, and pushpull for solid geometry.
-    Group the result so it stays separate from existing geometry.
-    Return a summary of what was built.
+    description: what to build
+    dimensions_m: key dimensions in meters e.g. {'width': 10, 'height': 6, 'depth': 8}
     """
     dims = dimensions_m or {}
     w = dims.get("width",  10.0)
     h = dims.get("height",  4.0)
     d = dims.get("depth",   8.0)
-
-    # Build a starter massing as a fallback the AI can then override
     ruby = f"""
-    m   = Sketchup.active_model
-    ents = m.entities
-    grp  = ents.add_group
+    m    = Sketchup.active_model
+    grp  = m.entities.add_group
     ge   = grp.entities
-
-    # Base massing in meters (SketchUp units = inches, 1m = 39.3701 inches)
     to_in = 39.3701
     w = {w} * to_in
     h = {h} * to_in
     d = {d} * to_in
-
-    # Draw base rectangle and push/pull to height
-    pts = [
-      Geom::Point3d.new(0,   0,   0),
-      Geom::Point3d.new(w,   0,   0),
-      Geom::Point3d.new(w,   d,   0),
-      Geom::Point3d.new(0,   d,   0)
-    ]
+    pts = [Geom::Point3d.new(0,0,0),Geom::Point3d.new(w,0,0),Geom::Point3d.new(w,d,0),Geom::Point3d.new(0,d,0)]
     face = ge.add_face(pts)
     face.pushpull(h)
-
     m.active_view.zoom_extents
-    {{
-      status:      "built",
-      description: {repr(description)},
-      dimensions:  {{width_m: {w}, height_m: {h}, depth_m: {d}}},
-      note:        "Base massing created. Use sketchup_ruby to refine with openings, details, or facade elements from the reference image."
-    }}
+    {{status:"built",description:{repr(description)},dimensions:{{width_m:{w},height_m:{h},depth_m:{d}}},
+     note:"Base massing created. Refine with sketchup_ruby for openings and facade details."}}
     """
     try:
         from log_setup import timed_operation
         with timed_operation("sketchup:build_from_reference"):
-            result = run_ruby_json(ruby)
-        return result
+            return run_ruby_json(ruby)
     except SketchUpNotRunning:
         raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
     except SketchUpError as e:
         raise RuntimeError(f"SketchUp Ruby error: {e}")
+
+
+@mcp.tool()
+def sketchup_get_model_info() -> dict:
     """
     Return a quick summary of the currently open SketchUp model:
     name, path, entity counts, component list, material list, layer list.
@@ -500,16 +577,16 @@ def sketchup_capture_viewport(
             return run_ruby_json("""
             m = Sketchup.active_model
             {
-              name:        m.name,
-              path:        m.path,
-              entities:    m.entities.count,
-              faces:       m.entities.grep(Sketchup::Face).count,
-              edges:       m.entities.grep(Sketchup::Edge).count,
-              groups:      m.entities.grep(Sketchup::Group).count,
-              components:  m.entities.grep(Sketchup::ComponentInstance).map{|e| {name: e.definition.name, id: e.entityID}},
-              materials:   m.materials.map{|mat| {name: mat.name, color: mat.color.to_a}},
-              layers:      m.layers.map{|l| {name: l.name, visible: l.visible?}},
-              selection:   m.selection.map{|e| {type: e.class.name, id: e.entityID}}
+              name:       m.name,
+              path:       m.path,
+              entities:   m.entities.count,
+              faces:      m.entities.grep(Sketchup::Face).count,
+              edges:      m.entities.grep(Sketchup::Edge).count,
+              groups:     m.entities.grep(Sketchup::Group).count,
+              components: m.entities.grep(Sketchup::ComponentInstance).map{|e| {name: e.definition.name, id: e.entityID}},
+              materials:  m.materials.map{|mat| {name: mat.name, color: mat.color.to_a}},
+              layers:     m.layers.map{|l| {name: l.name, visible: l.visible?}},
+              selection:  m.selection.map{|e| {type: e.class.name, id: e.entityID}}
             }
             """)
     except SketchUpNotRunning:

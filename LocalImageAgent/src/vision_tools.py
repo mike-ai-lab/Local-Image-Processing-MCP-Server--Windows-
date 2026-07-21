@@ -146,3 +146,54 @@ def read_folder_for_vision(params: ReadFolderForVisionInput) -> dict[str, Any]:
         "errors":                 errors,
         "images":                 images,
     }
+
+
+# ---------------------------------------------------------------------------
+# read_image_for_generation  — optimize + encode for image-to-image generation
+# ---------------------------------------------------------------------------
+
+class ReadImageForGenerationInput(BaseModel):
+    path:          str = Field(...,
+        description="Absolute path to the image file on the local device.")
+    target_kb:     int = Field(450, ge=100, le=1500,
+        description="Target file size in KB after optimization. Default 450 KB.")
+    max_dimension: int = Field(1920, ge=512, le=3840,
+        description="Longest side in pixels. Default 1920 — preserves enough detail for generation.")
+
+
+def read_image_for_generation(params: ReadImageForGenerationInput) -> dict[str, Any]:
+    """
+    GENERATION REFERENCE TOOL — read a local image, optimize it to ~400-500 KB WebP,
+    and return it as base64 so ChatGPT can:
+    1. SEE the image (visual reference for the generation prompt)
+    2. USE it as context to generate a modified version with DALL-E / native image generation
+
+    Use this when the user says things like:
+    - "see this image and generate a night-time version"
+    - "read this render and add people / change the lighting / make it rainy"
+    - "use this image as reference and generate a variation"
+
+    Optimizes BEFORE reading: converts to WebP at target_kb to avoid burning context with
+    large raw files (10MB+ PNGs become ~400-500 KB WebP without visible quality loss).
+
+    After receiving this tool's response, use the base64 image as your visual reference,
+    then call the native image generation tool (DALL-E) with a detailed prompt describing
+    what to change, preserving the scene composition from the reference.
+    """
+    from pathlib import Path
+    from image_gen_vision import optimize_for_gen_vision
+
+    p = Path(params.path)
+    if not p.exists():
+        raise val.ValidationError(f"Image not found: {params.path}")
+    if not p.is_file():
+        raise val.ValidationError(f"Not a file: {params.path}")
+
+    ext = p.suffix.lstrip(".").lower()
+    if ext not in SUPPORTED_INPUT_FORMATS:
+        raise val.ValidationError(
+            f"Unsupported format '.{ext}'. Supported: {sorted(SUPPORTED_INPUT_FORMATS)}"
+        )
+
+    with timed_operation(f"read_image_for_generation {p.name} -> WebP ~{params.target_kb}KB"):
+        return optimize_for_gen_vision(p, target_kb=params.target_kb, max_dimension=params.max_dimension)
