@@ -331,3 +331,317 @@ def generate_scene_report() -> dict[str, Any]:
         "issues":issues,"suggestions":suggestions,
         "texture_report":texture,"components":scene.get("components",[]),"tags":scene.get("tags",[]),
     }
+
+
+# ---------------------------------------------------------------------------
+# Environment & Camera tools
+# ---------------------------------------------------------------------------
+
+def get_environment_setup() -> dict[str, Any]:
+    """Read environment, camera, sun and V-Ray settings — split into small calls to avoid timeouts."""
+    # Call 1: camera + sun + sky
+    base = _ruby("""
+    m=Sketchup.active_model; view=m.active_view; cam=view.camera
+    si=m.shadow_info; ro=m.rendering_options
+    {
+      camera: {perspective: cam.perspective?, fov: cam.fov.round(2),
+               focal_length: cam.focal_length.round(2),
+               image_width: view.vpwidth, image_height: view.vpheight,
+               aspect_ratio: (view.vpwidth.to_f/view.vpheight).round(3)},
+      sun: {display_shadows: si["DisplayShadows"], light_intensity: si["Light"],
+            dark_intensity: si["Dark"], day_of_year: si["DayOfYear"],
+            city: si["City"], country: si["Country"],
+            latitude: si["Latitude"].to_f.round(4), longitude: si["Longitude"].to_f.round(4),
+            north_angle: si["NorthAngle"].to_f.round(2), tz_offset: si["TZOffset"],
+            use_sun_for_shading: si["UseSunForAllShading"]},
+      sky: {background_color: ro["BackgroundColor"].to_s,
+            fog_enabled: ro["DisplayFog"], sky_color: ro["SkyColor"].to_s},
+      sketchup_version: Sketchup.version
+    }
+    """)
+
+    # Call 2: scenes list
+    scenes_data = _ruby("""
+    m=Sketchup.active_model
+    active=m.pages.selected_page
+    m.pages.map{|p|
+      {name: p.name, active: p==active,
+       use_camera: p.use_camera?,
+       use_shadow_info: p.use_shadow_info?,
+       use_rendering_opts: p.use_rendering_options?}
+    }
+    """)
+
+    # Call 3: V-Ray quick check
+    vray_data = _ruby("""
+    if defined?(VRay)
+      begin
+        sc=VRay::Scene.getActiveVRayScene rescue nil
+        cn=sc ? (sc.physicalCamera rescue nil) : nil
+        {available: true,
+         camera: cn ? {
+           exposure: (cn.exposure rescue nil),
+           f_number: (cn.fNumber rescue nil),
+           iso: (cn.ISO rescue nil),
+           shutter_speed: (cn.shutterSpeed rescue nil),
+           white_balance: (cn.whiteBalance rescue nil)
+         } : nil}
+      rescue => e
+        {available: true, error: e.message}
+      end
+    else
+      {available: false}
+    end
+    """)
+
+    result = base if isinstance(base, dict) else {}
+    result["scenes"] = scenes_data if isinstance(scenes_data, list) else []
+    result["vray"]   = vray_data   if isinstance(vray_data, dict)  else {"available": False}
+    return result
+
+
+
+def save_environment_scene(scene_name: str) -> dict[str, Any]:
+    """
+    Create or update a SketchUp scene that saves the current camera,
+    shadow, rendering options, and style — so the setup can always be restored.
+    """
+    return _ruby(f"""
+    m    = Sketchup.active_model
+    name = {repr(scene_name)}
+
+    # Find existing scene or create new one
+    page = m.pages[name]
+    existed = !page.nil?
+
+    m.start_operation("MCP Save Environment Scene", true)
+    if page.nil?
+      page = m.pages.add(name)
+    end
+
+    # Save all environment properties into this scene
+    page.set_visibility(nil, false) rescue nil
+
+    # Flags: camera + rendering options + shadow info + style
+    flags = Sketchup::Page::CAMERA_POS |
+            Sketchup::Page::RENDERING_OPTIONS |
+            Sketchup::Page::SHADOWINFO |
+            Sketchup::Page::SKETCHUP_PAGE_USE_STYLE rescue (1|4|8|16)
+
+    # Update the scene to capture current settings
+    m.pages.selected_page = page
+    page.update(255) rescue nil
+
+    m.commit_operation
+
+    {{
+      scene_name:  name,
+      existed:     existed,
+      action:      existed ? "updated" : "created",
+      status:      "saved",
+      note:        "Scene '#{{name}}' now stores camera, sun, shadows and rendering options. Click it anytime to restore."
+    }}
+    """)
+
+
+def apply_environment_settings(settings: dict) -> dict[str, Any]:
+    """
+    Apply environment, sun, camera or V-Ray settings.
+    settings keys: sun_light, sun_dark, shadow_time, fov, perspective,
+                   fog_enabled, vray_exposure, vray_f_number, vray_iso,
+                   vray_shutter, vray_white_balance
+    """
+    lines = []
+
+    if "sun_light" in settings:
+        v = float(settings["sun_light"])
+        lines.append(f"si['Light'] = {v}")
+
+    if "sun_dark" in settings:
+        v = float(settings["sun_dark"])
+        lines.append(f"si['Dark'] = {v}")
+
+    if "display_shadows" in settings:
+        v = "true" if settings["display_shadows"] else "false"
+        lines.append(f"si['DisplayShadows'] = {v}")
+
+    if "fov" in settings:
+        v = float(settings["fov"])
+        lines.append(f"cam.fov = {v}")
+
+    if "perspective" in settings:
+        v = "true" if settings["perspective"] else "false"
+        lines.append(f"cam.perspective = {v}")
+
+    if "fog_enabled" in settings:
+        v = "true" if settings["fog_enabled"] else "false"
+        lines.append(f"ro['DisplayFog'] = {v}")
+
+    apply_block = "\n    ".join(lines) if lines else "# no sketchup settings"
+
+    # V-Ray block — only runs if V-Ray is loaded
+    vray_lines = []
+    vray_cam_settings = {
+        "vray_exposure":      "exposure",
+        "vray_f_number":      "fNumber",
+        "vray_iso":           "ISO",
+        "vray_shutter":       "shutterSpeed",
+        "vray_white_balance": "whiteBalance",
+    }
+    for key, vray_attr in vray_cam_settings.items():
+        if key in settings:
+            v = settings[key]
+            vray_lines.append(f"cam_node.{vray_attr} = {repr(v)}")
+
+    vray_block = "\n      ".join(vray_lines) if vray_lines else "# no vray camera settings"
+
+    return _ruby(f"""
+    m    = Sketchup.active_model
+    view = m.active_view
+    cam  = view.camera
+    ro   = m.rendering_options
+    si   = m.shadow_info
+    changed = []
+
+    m.start_operation("MCP Apply Environment", true)
+    {apply_block}
+    {"changed << 'sketchup_settings'" if lines else ""}
+    m.commit_operation
+
+    if defined?(VRay)
+      begin
+        vr_scene = VRay::Scene.getActiveVRayScene rescue nil
+        if vr_scene
+          cam_node = vr_scene.physicalCamera rescue nil
+          if cam_node
+            {vray_block}
+            {"changed << 'vray_camera'" if vray_lines else ""}
+          end
+        end
+      rescue => e
+        # VRay error — non-fatal
+      end
+    end
+
+    view.invalidate
+    {{
+      applied:  {repr(settings)},
+      changed:  changed,
+      status:   "ok"
+    }}
+    """)
+
+
+def diagnose_environment() -> dict[str, Any]:
+    """
+    Diagnose common environment issues: overexposure, underexposure,
+    sun/shadow misconfiguration, camera problems, V-Ray exposure issues.
+    Returns issues list with severity and fix recommendations.
+    """
+    setup = get_environment_setup()
+
+    issues = []
+    recommendations = []
+
+    sun = setup.get("sun", {})
+    cam = setup.get("camera", {})
+    vray = setup.get("vray", {})
+
+    # Sun light intensity checks
+    light = sun.get("light_intensity", 80)
+    dark  = sun.get("dark_intensity", 0)
+
+    if isinstance(light, (int, float)):
+        if light > 90:
+            issues.append({
+                "type": "overexposure",
+                "severity": "high",
+                "detail": f"Sun light intensity is very high ({light}/100)",
+                "fix": "Reduce sun light intensity to 70-80"
+            })
+            recommendations.append({"setting": "sun_light", "current": light, "suggested": 75})
+        elif light < 40:
+            issues.append({
+                "type": "underexposure",
+                "severity": "medium",
+                "detail": f"Sun light intensity is low ({light}/100)",
+                "fix": "Increase sun light intensity to 70-80"
+            })
+            recommendations.append({"setting": "sun_light", "current": light, "suggested": 75})
+
+    if isinstance(dark, (int, float)) and dark > 60:
+        issues.append({
+            "type": "ambient_too_bright",
+            "severity": "medium",
+            "detail": f"Shadow (ambient) intensity is high ({dark}/100) — shadows will look washed out",
+            "fix": "Reduce shadow intensity to 20-40 for more contrast"
+        })
+        recommendations.append({"setting": "sun_dark", "current": dark, "suggested": 30})
+
+    # Camera FOV checks
+    fov = cam.get("fov", 45)
+    if isinstance(fov, (int, float)):
+        if fov > 90:
+            issues.append({
+                "type": "wide_fov",
+                "severity": "low",
+                "detail": f"Camera FOV is very wide ({fov}°) — may cause distortion",
+                "fix": "Use 45-60° for standard architectural views, 28-35mm equiv for interiors"
+            })
+        elif fov < 15:
+            issues.append({
+                "type": "narrow_fov",
+                "severity": "low",
+                "detail": f"Camera FOV is very narrow ({fov}°) — telephoto compression",
+                "fix": "Increase FOV if this is not intentional"
+            })
+
+    # V-Ray camera checks
+    if vray.get("available") and isinstance(vray.get("camera"), dict):
+        vc = vray["camera"]
+        exposure = vc.get("exposure")
+        f_number = vc.get("f_number")
+        iso      = vc.get("iso")
+
+        if isinstance(exposure, (int, float)):
+            if exposure > 1.5:
+                issues.append({
+                    "type": "vray_overexposure",
+                    "severity": "high",
+                    "detail": f"V-Ray exposure is high ({exposure}) — render will be blown out",
+                    "fix": "Reduce V-Ray exposure to 0.5-1.0"
+                })
+                recommendations.append({"setting": "vray_exposure", "current": exposure, "suggested": 0.8})
+            elif exposure < 0.2:
+                issues.append({
+                    "type": "vray_underexposure",
+                    "severity": "high",
+                    "detail": f"V-Ray exposure is very low ({exposure}) — render will be very dark",
+                    "fix": "Increase V-Ray exposure to 0.5-1.0"
+                })
+                recommendations.append({"setting": "vray_exposure", "current": exposure, "suggested": 0.8})
+
+        if isinstance(f_number, (int, float)) and f_number < 1.4:
+            issues.append({
+                "type": "vray_aperture_wide",
+                "severity": "medium",
+                "detail": f"V-Ray aperture f/{f_number} is very wide — deep DOF blur and overexposure risk",
+                "fix": "Use f/5.6 to f/11 for architectural renders"
+            })
+            recommendations.append({"setting": "vray_f_number", "current": f_number, "suggested": 8.0})
+
+    if not issues:
+        issues.append({
+            "type": "none",
+            "severity": "ok",
+            "detail": "No obvious environment issues detected",
+            "fix": "Settings look reasonable"
+        })
+
+    return {
+        "current_setup": setup,
+        "issues": issues,
+        "issue_count": len([i for i in issues if i["severity"] != "ok"]),
+        "recommendations": recommendations,
+        "vray_available": vray.get("available", False)
+    }

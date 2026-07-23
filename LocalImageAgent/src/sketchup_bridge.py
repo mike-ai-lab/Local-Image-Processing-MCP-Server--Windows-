@@ -22,7 +22,7 @@ logger = logging.getLogger("local-image-agent")
 SKETCHUP_HOST   = "127.0.0.1"
 SKETCHUP_PORT   = 9876
 CONNECT_TIMEOUT = 5.0    # seconds to wait for connection
-RECV_TIMEOUT    = 120.0  # seconds to wait for Ruby result
+RECV_TIMEOUT    = 30.0   # seconds to wait for Ruby result
 MAX_RETRIES     = 2
 
 
@@ -71,22 +71,19 @@ def _disconnect():
 # ---------------------------------------------------------------------------
 
 def _receive_response(sock: socket.socket, timeout: float) -> dict:
-    """Read newline-delimited JSON response, accumulating chunks until valid."""
+    """Read newline-delimited JSON — returns on the first valid complete line."""
     sock.settimeout(timeout)
-    chunks: list[bytes] = []
+    buf = b""
 
     while True:
         try:
             chunk = sock.recv(65536)
             if not chunk:
-                if not chunks:
-                    raise SketchUpError("SketchUp closed connection before sending a response.")
                 break
-            chunks.append(chunk)
-
-            # Check if we have a complete newline-terminated JSON response
-            data = b"".join(chunks)
-            for line in data.split(b"\n"):
+            buf += chunk
+            # Try each newline-terminated line
+            while b"\n" in buf:
+                line, buf = buf.split(b"\n", 1)
                 line = line.strip()
                 if not line:
                     continue
@@ -95,14 +92,12 @@ def _receive_response(sock: socket.socket, timeout: float) -> dict:
                 except json.JSONDecodeError:
                     continue
         except socket.timeout:
-            logger.warning("Socket timeout waiting for SketchUp response")
             break
         except (ConnectionError, OSError) as e:
             raise SketchUpError(f"Connection error receiving from SketchUp: {e}") from e
 
-    # Last attempt on whatever we have
-    data = b"".join(chunks)
-    for line in data.split(b"\n"):
+    # Last attempt on remainder
+    for line in buf.split(b"\n"):
         line = line.strip()
         if not line:
             continue
@@ -111,7 +106,7 @@ def _receive_response(sock: socket.socket, timeout: float) -> dict:
         except json.JSONDecodeError:
             pass
 
-    raise SketchUpError("Incomplete or invalid JSON response from SketchUp.")
+    raise SketchUpError("No valid JSON response received from SketchUp.")
 
 
 # ---------------------------------------------------------------------------

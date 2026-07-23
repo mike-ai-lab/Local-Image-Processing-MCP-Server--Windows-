@@ -113,7 +113,14 @@ module MCPBridge
       begin
         req  = JSON.parse(line)
         resp = process_request(req)
-        json = JSON.generate(resp) + "\n"
+        begin
+          json = JSON.generate(resp) + "\n"
+        rescue => je
+          json = JSON.generate({
+            'jsonrpc' => '2.0', 'id' => (req['id'] rescue nil),
+            'error' => { 'code' => -32603, 'message' => "Serialization error: #{je.message}" }
+          }) + "\n"
+        end
         c[:sock].write(json)
         c[:sock].flush
       rescue JSON::ParserError => e
@@ -175,14 +182,31 @@ module MCPBridge
 
   def self.eval_ruby_safe(code)
     result = eval(code, TOPLEVEL_BINDING, '<mcp>', 1)
+    # Ensure result is JSON-serialisable
     case result
     when String, NilClass, TrueClass, FalseClass, Integer, Float
       result
+    when Hash, Array
+      # Re-encode through JSON to catch any non-serialisable values
+      begin
+        JSON.parse(JSON.generate(result))
+      rescue
+        result.inspect
+      end
     else
-      begin; JSON.parse(result.to_json); rescue; result.inspect; end
+      begin
+        JSON.parse(result.to_json)
+      rescue
+        result.inspect
+      end
     end
+  rescue SyntaxError => e
+    { 'ruby_error' => true, 'error_class' => 'SyntaxError',
+      'message' => e.message.lines.first(3).join(' ').strip }
   rescue => e
-    raise "#{e.class}: #{e.message}\n#{e.backtrace.first(3).join("\n")}"
+    { 'ruby_error' => true, 'error_class' => e.class.to_s,
+      'message' => e.message,
+      'backtrace' => e.backtrace.first(3) }
   end
 
   # ---------------------------------------------------------------------------

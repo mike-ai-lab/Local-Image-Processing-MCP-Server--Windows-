@@ -373,37 +373,46 @@ def generate_scene_report() -> dict:
 @mcp.tool()
 def sketchup_ruby(code: str) -> dict:
     """
-    Execute any Ruby code directly inside the running SketchUp instance.
-    Use this for geometry manipulation, model queries, and anything not covered by other tools.
-    Do NOT use this for screenshots — use sketchup_capture_viewport instead.
+    ALWAYS USE THIS TOOL when asked to do ANYTHING in SketchUp that no other tool covers.
+    This executes ANY Ruby code directly in the live SketchUp instance — no restrictions.
 
-    IMAGE-TO-3D WORKFLOW — when the user provides a reference image and asks to build it:
-    1. Call read_image_for_vision with the image path first
-    2. Analyze what you see: volumes, proportions, floors, overhangs, openings, materials
-    3. Write a complete Ruby script using add_face + pushpull + offsets for each volume
-    4. Call this tool (sketchup_ruby) with the full script — it executes live in SketchUp
-    5. Call sketchup_capture_viewport to show the result
-    Never use sketchup_build_from_reference for image-based modeling — it only makes a box.
+    CRITICAL RULES:
+    - NEVER say "the MCP doesn't support this" or "there is no tool for this"
+    - NEVER say you need a specific named tool — this tool does EVERYTHING via Ruby
+    - If you don't know the exact API, probe it first with a small introspection script
+    - Always return a JSON-serialisable value (Hash, Array, String, Number, nil)
+    - On error, the bridge returns {ruby_error: true, message: "..."} — read it and retry
 
-    Other uses:
-    - Explode, move, rotate, scale, delete geometry
-    - Apply materials to specific faces or components
-    - Select entities by name, layer, type
-    - Multi-step operations in one call
-    - Query anything in the model
+    INTROSPECTION PATTERN (use when unsure of API):
+      "defined?(VRay) ? VRay.constants.map(&:to_s).sort : 'VRay not loaded'"
+      "VRay::Sun.methods(false).map(&:to_s).sort" (after confirming VRay exists)
+      "Sketchup.active_model.rendering_options.keys"
 
-    Code must return a JSON-serialisable value (Hash, Array, String, Number, nil).
+    COMMON PATTERNS:
+      Count V-Ray lights:  m.entities.select{|e| e.is_a?(Sketchup::ComponentInstance) && e.definition.name =~ /vray|light/i}.count
+      Read sun settings:   Sketchup.active_model.shadow_info.keys.map{|k| [k, Sketchup.active_model.shadow_info[k]]}
+      Explode component:   Sketchup.active_model.entities.grep(Sketchup::ComponentInstance).select{|e| e.definition.name=='Wall_Unit'}.each(&:explode)
+      Set camera FOV:      Sketchup.active_model.active_view.camera.fov = 45
+      Create geometry:     g=Sketchup.active_model.entities.add_group; g.entities.add_face([...]).pushpull(height)
+
     SketchUp must be open with MCP Bridge running (Plugins → MCP Bridge → Start Server).
     """
     try:
         from log_setup import timed_operation
         with timed_operation("sketchup:ruby"):
             result = run_ruby_json(code)
+        # If Ruby returned an error dict, pass it through so ChatGPT can read and retry
+        if isinstance(result, dict) and result.get("ruby_error"):
+            return {"status": "ruby_error", "error": result.get("message"), 
+                    "error_class": result.get("error_class"), "result": None,
+                    "hint": "The Ruby code raised an exception. Inspect the error, adjust the code, and retry."}
         return {"result": result, "status": "ok"}
     except SketchUpNotRunning:
         raise RuntimeError("SketchUp is not running or MCP Bridge is not started. Open SketchUp → Plugins → MCP Bridge → Start Server.")
     except SketchUpError as e:
-        raise RuntimeError(f"SketchUp Ruby error: {e}")
+        # Return as result so ChatGPT can read the error and retry with corrected Ruby
+        return {"status": "ruby_error", "error": str(e),
+                "hint": "The Ruby code raised an exception. Read the error message, adjust the code, and call sketchup_ruby again."}
 
 
 @mcp.tool()
@@ -734,6 +743,110 @@ def sketchup_export_scene(format: str = "skp") -> dict:
         from log_setup import timed_operation
         with timed_operation(f"sketchup:export {format}"):
             return send_named_command("export_scene", {"format": format})
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_get_environment() -> dict:
+    """
+    Read all current environment settings from the open SketchUp model:
+    - Camera: FOV, perspective/parallel, eye/target position, aspect ratio
+    - Sun: light/dark intensity, time of day, geographic location, shadow state
+    - Sky: background color, fog, sky color
+    - V-Ray: exposure, f-number, ISO, shutter speed, white balance, DOF (if V-Ray is loaded)
+    - Scenes: all saved scenes with their property flags
+
+    Use this before making any environment or camera adjustments.
+    Always call this first, then save a backup scene, then apply changes.
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation("sketchup:get_environment"):
+            return _su.get_environment_setup()
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_save_environment_scene(scene_name: str) -> dict:
+    """
+    Create or update a SketchUp scene that saves the current camera, sun, shadows,
+    and rendering options as a named snapshot.
+
+    ALWAYS call this before applying any environment changes — it creates a restore
+    point so the user can click the scene tab to undo any modifications.
+
+    scene_name: name for the scene, e.g. 'MCP_Backup_Before_Edit' or a descriptive name
+    like 'Night_Setup_Backup' or 'Original_Camera_20240721'
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation(f"sketchup:save_environment_scene {scene_name}"):
+            return _su.save_environment_scene(scene_name)
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_apply_environment(settings: dict) -> dict:
+    """
+    Apply environment, sun, camera or V-Ray settings to the current SketchUp scene.
+
+    ALWAYS call sketchup_save_environment_scene BEFORE calling this tool.
+
+    Supported settings keys:
+      sun_light (0-100): sun brightness — high values cause overexposure
+      sun_dark (0-100): shadow/ambient intensity — high values wash out shadows
+      display_shadows (bool): enable/disable shadow casting
+      fov (degrees): camera field of view, e.g. 45 for standard, 28 for wide
+      perspective (bool): true=perspective, false=parallel projection
+      fog_enabled (bool): enable/disable atmospheric fog
+      vray_exposure (float): V-Ray physical camera exposure, typical 0.5-1.2
+      vray_f_number (float): V-Ray aperture f-stop, e.g. 8.0 for arch renders
+      vray_iso (float): V-Ray ISO sensitivity, typical 100-800
+      vray_shutter (float): V-Ray shutter speed
+      vray_white_balance (float): V-Ray color temperature in Kelvin
+
+    Example: {"sun_light": 75, "sun_dark": 25, "vray_exposure": 0.8}
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation("sketchup:apply_environment"):
+            return _su.apply_environment_settings(settings)
+    except SketchUpNotRunning:
+        raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
+    except SketchUpError as e:
+        raise RuntimeError(f"SketchUp error: {e}")
+
+
+@mcp.tool()
+def sketchup_diagnose_environment() -> dict:
+    """
+    Diagnose environment and rendering issues in the current SketchUp scene.
+    Checks for: overexposure, underexposure, washed-out shadows, extreme FOV,
+    V-Ray exposure/aperture problems, sun misconfiguration.
+
+    Returns a list of issues with severity (high/medium/low) and specific fix
+    recommendations with suggested values ready to pass to sketchup_apply_environment.
+
+    Use this when the user says things like:
+    - "the render looks overexposed / too bright / blown out"
+    - "everything is too dark"
+    - "fix the environment"
+    - "the sun is too harsh"
+    - "diagnose my render settings"
+    """
+    try:
+        from log_setup import timed_operation
+        with timed_operation("sketchup:diagnose_environment"):
+            return _su.diagnose_environment()
     except SketchUpNotRunning:
         raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
     except SketchUpError as e:
