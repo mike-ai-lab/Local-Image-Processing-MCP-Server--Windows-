@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*.egg-info/
+
+# Logs
+*.log
+*.log.*
+
+# Backup files
+src/*.backup
+
+# Images & media (working files, not source)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.webp
+*.avif
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# 3D / design files
+*.max
+*.skp
+*.skb
+*.fbx
+*.obj
+*.3ds
+
+# Project-specific data files
+*.txt
+STC_*
+snapshot_*
+
+# Editor / IDE
+.vscode/
+.kiro/
+*.code-workspace
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Misc user content
+.user-conents/
+IMAGES/

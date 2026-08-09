@@ -14,6 +14,7 @@ module MCPBridge
   @server  = nil
   @running = false
   @clients = []
+  @shutdown_observer_registered = false
 
   unless file_loaded?(__FILE__)
     menu = UI.menu('Plugins').add_submenu('MCP Bridge')
@@ -28,7 +29,45 @@ module MCPBridge
   # ---------------------------------------------------------------------------
 
   def self.start_server
-    return UI.messagebox("MCP Bridge is already running on port #{PORT}.") if @running
+    # Already running in THIS SketchUp instance
+    if @running
+      answer = UI.messagebox(
+        "MCP Bridge is already running in this window on port #{PORT}.\n\nDo you want to restart it?",
+        MB_YESNO
+      )
+      return unless answer == IDYES
+      stop_server
+    end
+
+    # Check if port is occupied by a DIFFERENT process (e.g. stale server from a crash)
+    port_in_use = begin
+      probe = TCPSocket.new(HOST, PORT)
+      probe.close
+      true
+    rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
+      false
+    rescue
+      false
+    end
+
+    if port_in_use
+      answer = UI.messagebox(
+        "Port #{PORT} is already in use — another MCP Bridge instance appears to be running\n" \
+        "(possibly from a previous SketchUp session that crashed).\n\n" \
+        "Do you want to stop the other bridge and start a new one here?",
+        MB_YESNO
+      )
+      return unless answer == IDYES
+      # Force-release the port by attempting a kill via a 'shutdown' command,
+      # then fall through — SO_REUSEADDR will reclaim it.
+      begin
+        killer = TCPSocket.new(HOST, PORT)
+        killer.write(JSON.generate({ 'jsonrpc' => '2.0', 'id' => 0, 'method' => '__shutdown__' }) + "\n")
+        killer.close
+      rescue; end
+      sleep 0.3
+    end
+
     begin
       @server = TCPServer.new(HOST, PORT)
       @server.setsockopt(Socket::SOL_SOCKET, Socket::SO_REUSEADDR, true)
@@ -37,10 +76,25 @@ module MCPBridge
       puts "[MCP Bridge] Server started on #{HOST}:#{PORT} (v#{VERSION})"
       Sketchup.status_text = "[MCP Bridge] Running :#{PORT}"
       UI.start_timer(0.02, true) { poll }
+      _register_shutdown_observer
     rescue => e
       @running = false
       UI.messagebox("MCP Bridge failed to start: #{e.message}")
     end
+  end
+
+  # Register an AppObserver once to stop the server when SketchUp exits
+  def self._register_shutdown_observer
+    return if @shutdown_observer_registered
+
+    observer = Class.new(Sketchup::AppObserver) do
+      def onQuit
+        MCPBridge.stop_server rescue nil
+      end
+    end.new
+
+    Sketchup.add_observer(observer)
+    @shutdown_observer_registered = true
   end
 
   def self.stop_server
@@ -162,6 +216,7 @@ module MCPBridge
 
   def self.dispatch(method, params)
     case method
+    when '__shutdown__'      then (UI.start_timer(0.1, false) { stop_server }; 'stopping')
     when 'ping'              then 'pong'
     when 'eval_ruby'         then eval_ruby_safe(params['code'].to_s)
     when 'get_scene_info'    then get_scene_info

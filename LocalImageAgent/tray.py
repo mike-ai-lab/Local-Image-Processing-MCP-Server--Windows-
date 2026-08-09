@@ -1,9 +1,9 @@
 """
-LocalImageAgent — System Tray Controller
-- Green icon = server running
-- Red icon   = server stopped
-- Click tray icon to start/stop
-- Right-click for menu
+LocalImageAgent — Headless Background Service
+No system tray icon. Runs silently in the background.
+- Auto-starts MCP server + ngrok on launch
+- Watchdog restarts both if either crashes
+- Snapshot backup protects against bad code edits
 """
 
 import sys
@@ -12,33 +12,36 @@ import subprocess
 import threading
 import time
 import socket
+import shutil
+import logging
 from pathlib import Path
 
-import pystray
-from PIL import Image, ImageDraw
+# ---------------------------------------------------------------------------
+# Logging — write to agent.log same as the server
+# ---------------------------------------------------------------------------
+BASE       = Path(__file__).parent
+LOG_FILE   = BASE / "agent.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  tray  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+logger = logging.getLogger("tray")
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-BASE    = Path(__file__).parent
-PYTHON  = BASE / ".venv" / "Scripts" / "python.exe"
-SERVER  = BASE / "src" / "main_http.py"
-NGROK   = BASE / "ngrok" / "ngrok.exe"
-MCP_URL = "https://pectin-parting-caution.ngrok-free.dev/mcp"
-
-# ---------------------------------------------------------------------------
-# Icon helpers
-# ---------------------------------------------------------------------------
-
-def _make_icon(color: str) -> Image.Image:
-    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    draw.ellipse([4, 4, 60, 60], fill=color, outline="white", width=3)
-    return img
-
-ICON_GREEN = _make_icon("#22c55e")
-ICON_RED   = _make_icon("#ef4444")
-ICON_AMBER = _make_icon("#f59e0b")
+PYTHON   = BASE / ".venv" / "Scripts" / "python.exe"
+SERVER   = BASE / "src" / "main_http.py"
+BACKUP   = BASE / "src" / "main_http.py.backup"
+NGROK    = BASE / "ngrok" / "ngrok.exe"
+DOMAIN   = "pectin-parting-caution.ngrok-free.dev"
+MCP_URL  = f"https://{DOMAIN}/mcp"
 
 # ---------------------------------------------------------------------------
 # Process state
@@ -57,7 +60,6 @@ def _port_free(port: int) -> bool:
 
 
 def _kill_port(port: int) -> None:
-    """Kill whatever is holding the given port."""
     try:
         out = subprocess.check_output(
             f"netstat -ano | findstr :{port}", shell=True, text=True
@@ -82,16 +84,60 @@ def is_running() -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Backup / syntax guard
+# ---------------------------------------------------------------------------
+
+def _syntax_ok(path: Path) -> bool:
+    """Return True if the file compiles without errors."""
+    result = subprocess.run(
+        [str(PYTHON), "-m", "py_compile", str(path)],
+        capture_output=True, text=True
+    )
+    return result.returncode == 0
+
+
+def _save_backup() -> None:
+    """Snapshot current server file as known-good backup."""
+    try:
+        shutil.copy2(SERVER, BACKUP)
+        logger.info("Backup saved: %s", BACKUP.name)
+    except Exception as e:
+        logger.warning("Could not save backup: %s", e)
+
+
+def _restore_backup() -> bool:
+    """Restore backup over the broken server file. Returns True if restored."""
+    if BACKUP.exists():
+        try:
+            shutil.copy2(BACKUP, SERVER)
+            logger.warning("BACKUP RESTORED — bad edit reverted, server restarting from last good version")
+            return True
+        except Exception as e:
+            logger.error("Could not restore backup: %s", e)
+    return False
+
+
+# ---------------------------------------------------------------------------
 # Start / Stop
 # ---------------------------------------------------------------------------
 
-def start_server(icon: pystray.Icon) -> None:
+def start_server() -> bool:
+    """Start MCP server + ngrok. Returns True on success."""
     global _server_proc, _ngrok_proc
 
-    icon.icon = ICON_AMBER
-    icon.title = "MCP Server - Starting..."
+    logger.info("Starting MCP server...")
 
-    # Clean up stale processes
+    # Syntax check before launching
+    if not _syntax_ok(SERVER):
+        logger.error("Syntax error in %s — attempting backup restore", SERVER.name)
+        if _restore_backup():
+            if not _syntax_ok(SERVER):
+                logger.error("Backup also has errors — cannot start server")
+                return False
+        else:
+            logger.error("No backup available — cannot start server")
+            return False
+
     _kill_port(8765)
     subprocess.run("taskkill /F /IM ngrok.exe", shell=True, capture_output=True)
     time.sleep(1)
@@ -104,33 +150,32 @@ def start_server(icon: pystray.Icon) -> None:
             creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
-    # Wait for port
+    # Wait for port 8765 to be live
     for _ in range(15):
         time.sleep(1)
         if not _port_free(8765):
             break
     else:
-        icon.icon  = ICON_RED
-        icon.title = "MCP Server - Failed to start"
-        _update_menu(icon)
-        return
+        logger.error("MCP server did not come up on port 8765")
+        return False
 
     with _lock:
         _ngrok_proc = subprocess.Popen(
-            [str(NGROK), "http", "8765",
-             "--domain=pectin-parting-caution.ngrok-free.dev"],
+            [str(NGROK), "http", "8765", f"--domain={DOMAIN}"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
     time.sleep(2)
-    icon.icon  = ICON_GREEN
-    icon.title = f"MCP Server - Running  |  {MCP_URL}"
-    _update_menu(icon)
+    logger.info("Server running — MCP URL: %s", MCP_URL)
+
+    # Save a good backup now that startup succeeded
+    _save_backup()
+    return True
 
 
-def stop_server(icon: pystray.Icon) -> None:
+def stop_server() -> None:
     global _server_proc, _ngrok_proc
     with _lock:
         if _server_proc:
@@ -140,64 +185,32 @@ def stop_server(icon: pystray.Icon) -> None:
             _ngrok_proc.terminate()
             _ngrok_proc = None
     subprocess.run("taskkill /F /IM ngrok.exe", shell=True, capture_output=True)
-    icon.icon  = ICON_RED
-    icon.title = "MCP Server - Stopped"
-    _update_menu(icon)
-
-
-def toggle(icon: pystray.Icon, item=None) -> None:
-    if is_running():
-        threading.Thread(target=stop_server, args=(icon,), daemon=True).start()
-    else:
-        threading.Thread(target=start_server, args=(icon,), daemon=True).start()
+    logger.info("Server stopped")
 
 
 # ---------------------------------------------------------------------------
-# Menu
+# Watchdog
 # ---------------------------------------------------------------------------
 
-def _update_menu(icon: pystray.Icon) -> None:
-    running = is_running()
-    icon.menu = pystray.Menu(
-        pystray.MenuItem(
-            "Running  (click to stop)" if running else "Stopped  (click to start)",
-            toggle,
-            default=True,
-        ),
-        pystray.MenuItem(
-            f"URL: {MCP_URL}",
-            lambda icon, item: None,
-            enabled=False,
-        ),
-        pystray.Menu.SEPARATOR,
-        pystray.MenuItem("Quit", lambda icon, item: _quit(icon)),
-    )
-
-
-def _quit(icon: pystray.Icon) -> None:
-    stop_server(icon)
-    icon.stop()
-
-
-# ---------------------------------------------------------------------------
-# Watchdog — restart server if it crashes
-# ---------------------------------------------------------------------------
-
-def _watchdog(icon: pystray.Icon) -> None:
-    """Restart server/ngrok if either crashes or drops after sleep."""
+def _watchdog() -> None:
+    """Restart server/ngrok if either crashes or port drops."""
     while True:
         time.sleep(10)
         with _lock:
             sp = _server_proc
             np = _ngrok_proc
-        # Only watch if we're supposed to be running
         if sp is None:
-            continue
+            continue  # intentionally stopped, don't revive
         server_dead = sp.poll() is not None
         ngrok_dead  = np is not None and np.poll() is not None
         port_gone   = _port_free(8765)
         if server_dead or ngrok_dead or port_gone:
-            threading.Thread(target=start_server, args=(icon,), daemon=True).start()
+            reason = []
+            if server_dead: reason.append("server crashed")
+            if ngrok_dead:  reason.append("ngrok crashed")
+            if port_gone:   reason.append("port 8765 gone")
+            logger.warning("Watchdog triggered (%s) — restarting...", ", ".join(reason))
+            threading.Thread(target=start_server, daemon=True).start()
 
 
 # ---------------------------------------------------------------------------
@@ -205,19 +218,21 @@ def _watchdog(icon: pystray.Icon) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    icon = pystray.Icon(
-        name="LocalImageAgent",
-        icon=ICON_RED,
-        title="MCP Server - Stopped",
-    )
-    _update_menu(icon)
+    logger.info("LocalImageAgent background service starting")
 
-    # Auto-start on launch
-    threading.Thread(target=start_server, args=(icon,), daemon=True).start()
-    # Watchdog
-    threading.Thread(target=_watchdog, args=(icon,), daemon=True).start()
+    # Auto-start server on launch
+    threading.Thread(target=start_server, daemon=True).start()
 
-    icon.run()
+    # Watchdog runs forever
+    threading.Thread(target=_watchdog, daemon=True).start()
+
+    # Keep main thread alive
+    try:
+        while True:
+            time.sleep(60)
+    except KeyboardInterrupt:
+        logger.info("Shutdown requested")
+        stop_server()
 
 
 if __name__ == "__main__":

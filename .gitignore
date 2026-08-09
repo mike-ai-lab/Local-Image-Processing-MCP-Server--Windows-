@@ -1,0 +1,45 @@
+# Images & media (working files, not source code)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.webp
+*.avif
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# 3D / design files
+*.max
+*.skp
+*.skb
+*.fbx
+*.obj
+*.3ds
+
+# Project-specific data/snapshot files
+STC_*
+snapshot_*
+*.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Logs
+*.log
+*.log.*
+
+# Editor / IDE
+.vscode/
+.kiro/
+
+# Misc user content
+.user-conents/
+IMAGES/

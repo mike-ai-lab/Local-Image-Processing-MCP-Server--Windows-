@@ -1,4 +1,0 @@
-  File "C:\Users\Administrator\Local Image Processing MCP Server (Windows)\LocalImageAgent\src\main_http.py", line 426
-    ) -> dict:
-    ^
-SyntaxError: unmatched ')'

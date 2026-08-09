@@ -84,6 +84,7 @@ import video_tools as _vtools
 import file_tools as _ftools
 import vision_tools as _vision
 import sketchup_tools as _su
+import screen_tools as _screen
 from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchUpNotRunning, SketchUpError
 
 
@@ -363,6 +364,33 @@ def read_folder_for_vision(
         size=size, quality=quality, max_images=max_images,
         modified_within_hours=modified_within_hours, sort_by=sort_by,
     ))
+
+
+# ---------------------------------------------------------------------------
+# Screen capture tool
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def capture_screen(
+    output_file: str,
+    monitor: int = 0,
+    return_base64: bool = False,
+) -> dict:
+    """
+    Silently capture the Windows desktop and save it as a PNG — no window flash,
+    no new processes, zero interference with running applications (renders, etc.).
+
+    output_file: full path for the saved PNG, e.g. C:/Users/PC/Desktop/snapshot.png
+    monitor: 0 = all monitors (virtual desktop), 1 = primary, 2 = secondary, etc.
+    return_base64: if true, also returns the image inline so it can be shown in chat.
+    """
+    return _screen.capture_screen(
+        _screen.CaptureScreenInput(
+            output_file=output_file,
+            monitor=monitor,
+            return_base64=return_base64,
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
