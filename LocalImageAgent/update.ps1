@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 # ============================================================
-# LocalImageAgent — Remote Update Script
+# LocalImageAgent â€” Remote Update Script
 # Run this on the second device to pull latest code and
 # restart the server cleanly.
 # ============================================================
@@ -23,7 +23,7 @@ $check = & $PythonExe -m py_compile $ServerPy 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  [WARN] Current main_http.py has a syntax error:" -ForegroundColor Yellow
     Write-Host "         $check" -ForegroundColor Yellow
-    Write-Host "         Proceeding with pull — the update may fix it." -ForegroundColor Yellow
+    Write-Host "         Proceeding with pull â€” the update may fix it." -ForegroundColor Yellow
 }
 
 # ------------------------------------------------------------

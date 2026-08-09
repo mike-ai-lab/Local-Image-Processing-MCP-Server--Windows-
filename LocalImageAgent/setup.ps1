@@ -24,7 +24,7 @@ $NgrokDir   = Join-Path $ScriptDir "ngrok"
 $ConfigFile = Join-Path $ScriptDir "config.json"
 $TrayScript = Join-Path $ScriptDir "tray.py"
 
-# Ngrok auth token — update this if you need a different account
+# Ngrok auth token â€” update this if you need a different account
 $NgrokAuthToken = "3Gk8t1O4bcaHODsS4z7GK2jv2o2_22KQpqahcmZbwWcZbjAjb"
 $NgrokDomain    = "pectin-parting-caution.ngrok-free.dev"
 
@@ -125,13 +125,13 @@ if (-not $magickExe) {
 if ($magickExe) {
     Write-OK "Found: $magickExe"
 } else {
-    Write-Warn "ImageMagick not found — downloading installer..."
+    Write-Warn "ImageMagick not found â€” downloading installer..."
     $imUrl      = "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-47-Q16-HDRI-x64-dll.exe"
     $imInstaller = Join-Path $env:TEMP "ImageMagick-setup.exe"
     try {
         Invoke-WebRequest -Uri $imUrl -OutFile $imInstaller -UseBasicParsing
         Write-OK "Downloaded ImageMagick installer"
-        Write-Host "      Running installer (follow the prompts — check 'Add to PATH')..." -ForegroundColor Yellow
+        Write-Host "      Running installer (follow the prompts, check 'Add to PATH')..." -ForegroundColor Yellow
         Start-Process -FilePath $imInstaller -ArgumentList "/SILENT", "/TASKS=modifypath" -Wait
         # Re-check after install
         $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
@@ -143,7 +143,7 @@ if ($magickExe) {
             # Try common post-install path
             $hits = Get-Item "C:\Program Files\ImageMagick-7*\magick.exe" -ErrorAction SilentlyContinue | Sort-Object Name -Descending
             if ($hits) { $magickExe = $hits[0].FullName; Write-OK "Found at: $magickExe" }
-            else { Write-Warn "ImageMagick installed but path not found — you may need to restart and re-run" }
+            else { Write-Warn "ImageMagick installed but path not found â€” you may need to restart and re-run" }
         }
     } catch {
         Write-Warn "Could not download ImageMagick: $_"
@@ -176,7 +176,7 @@ if (-not $ffmpegExe) {
 if ($ffmpegExe) {
     Write-OK "Found: $ffmpegExe"
 } else {
-    Write-Warn "FFmpeg not found — downloading..."
+    Write-Warn "FFmpeg not found â€” downloading..."
     $ffUrl  = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
     $ffZip  = Join-Path $env:TEMP "ffmpeg.zip"
     $ffDest = "C:\ffmpeg"
@@ -210,7 +210,7 @@ Write-Step "Checking ngrok..."
 
 $ngrokExe = Join-Path $NgrokDir "ngrok.exe"
 if (-not (Test-Path $ngrokExe)) {
-    Write-Warn "ngrok not found — downloading..."
+    Write-Warn "ngrok not found â€” downloading..."
     $ngrokUrl = "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip"
     $ngrokZip = Join-Path $env:TEMP "ngrok.zip"
     try {
@@ -308,17 +308,17 @@ Write-Host "  To start the server:" -ForegroundColor White
 Write-Host "    Double-click 'Image MCP Server' on your desktop" -ForegroundColor Gray
 Write-Host "    OR run: .\start.ps1" -ForegroundColor Gray
 Write-Host ""
-Write-Host "  The tray app will auto-start on every Windows login." -ForegroundColor Gray
+Write-Host "    Write-Host "  The server will auto-start on every Windows login." -ForegroundColor Gray
 Write-Host ""
 
 # ---------------------------------------------------------------------------
-# 11. Launch tray now
+# 11. Launch server now
 # ---------------------------------------------------------------------------
 $launch = Read-Host "  Launch the MCP server now? (Y/n)"
 if ($launch -ne 'n' -and $launch -ne 'N') {
-    Write-Host "  Starting tray app..." -ForegroundColor Cyan
+    Write-Host "  Starting server..." -ForegroundColor Cyan
     Start-Process -FilePath $PythonExe -ArgumentList "`"$TrayScript`"" -WindowStyle Hidden
-    Write-Host "  Tray icon should appear in the system tray shortly." -ForegroundColor Green
+    Write-Host "  Server starting in background. Check agent.log for status." -ForegroundColor Green
 }
 
 Write-Host ""
