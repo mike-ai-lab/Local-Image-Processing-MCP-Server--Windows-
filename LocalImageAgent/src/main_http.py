@@ -977,6 +977,32 @@ def sketchup_apply_material_to_component(
         raise RuntimeError(f"SketchUp error: {e}")
 
 
+# ---------------------------------------------------------------------------
+# Log viewer
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def get_log(lines: int = 50) -> dict:
+    """
+    Return the last N lines of the server agent.log for debugging and monitoring.
+    Shows tool call history with [START]/[DONE]/[FAIL] entries and timing.
+    lines: number of recent lines to return (default 50, max 500)
+    """
+    log_path = Path(__file__).parent.parent / "agent.log"
+    lines = min(max(1, lines), 500)
+    if not log_path.exists():
+        return {"log": "", "lines_returned": 0, "path": str(log_path), "note": "log file not found"}
+    with open(log_path, "r", encoding="utf-8", errors="replace") as f:
+        all_lines = f.readlines()
+    recent = all_lines[-lines:]
+    return {
+        "log": "".join(recent),
+        "lines_returned": len(recent),
+        "total_lines": len(all_lines),
+        "path": str(log_path),
+    }
+
+
 if __name__ == "__main__":
     HOST = "127.0.0.1"
     PORT = 8765
