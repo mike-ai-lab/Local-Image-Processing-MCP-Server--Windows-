@@ -34,50 +34,12 @@ def _get_ngrok_url() -> str:
         pass
     return "https://<ngrok not running>"
 
+import time as _time
+
 mcp = FastMCP(
     name=config.server_name,
     version=config.server_version,
 )
-
-
-# ---------------------------------------------------------------------------
-# Request-level logging middleware — logs every tool call with tool name
-# ---------------------------------------------------------------------------
-import time as _time
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request as _Request
-
-
-class ToolCallLoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: _Request, call_next):
-        # Only log POST /mcp — that's where tool calls come in
-        if request.method == "POST":
-            try:
-                body = await request.body()
-                data = _json.loads(body) if body else {}
-                method = data.get("method", "")
-                if method == "tools/call":
-                    tool_name = data.get("params", {}).get("name", "unknown")
-                    t0 = _time.perf_counter()
-                    logger.info("[TOOL] %-40s  called", tool_name)
-                    # Re-inject body since it was consumed
-                    from starlette.datastructures import Headers
-                    from starlette.types import Receive, Scope, Send
-                    import io
-
-                    async def receive():
-                        return {"type": "http.request", "body": body, "more_body": False}
-
-                    request = _Request(request.scope, receive)
-                    response = await call_next(request)
-                    elapsed = _time.perf_counter() - t0
-                    logger.info("[TOOL] %-40s  done  (%.3fs)  status=%s",
-                                tool_name, elapsed, response.status_code)
-                    return response
-            except Exception:
-                pass  # never break the server for logging
-
-        return await call_next(request)
 
 import tools as _tools
 import video_tools as _vtools
@@ -1022,12 +984,9 @@ if __name__ == "__main__":
     logger.info("Starting %s v%s", config.server_name, config.server_version)
     logger.info("Local endpoint:  http://%s:%d/mcp", HOST, PORT)
     logger.info("ngrok MCP URL:   %s/mcp", ngrok_url)
-    logger.info("Tool calls will be logged with [TOOL] prefix below")
-
-    import uvicorn
-    app = mcp.http_app(
-        path="/mcp",
+    mcp.run(
         transport="streamable-http",
-        middleware=[ToolCallLoggingMiddleware],
+        host=HOST,
+        port=PORT,
+        path="/mcp",
     )
-    uvicorn.run(app, host=HOST, port=PORT, log_level="warning")
