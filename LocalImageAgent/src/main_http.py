@@ -47,6 +47,7 @@ import file_tools as _ftools
 import vision_tools as _vision
 import sketchup_tools as _su
 import screen_tools as _screen
+import system_tools as _sys
 from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchUpNotRunning, SketchUpError
 
 
@@ -975,6 +976,66 @@ def sketchup_apply_material_to_component(
         raise RuntimeError("SketchUp is not running or MCP Bridge is not started.")
     except SketchUpError as e:
         raise RuntimeError(f"SketchUp error: {e}")
+
+
+# ---------------------------------------------------------------------------
+# System / process control tools
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def terminate_process(name_or_pid: str, force: bool = True) -> dict:
+    """
+    Terminate a running process by name or PID. Runs fully in the background.
+    name_or_pid: process name (e.g. 'SketchUp.exe', '3dsmax.exe') or numeric PID.
+    force: True = hard kill (/F), False = graceful terminate.
+    """
+    return _sys.terminate_process(name_or_pid, force)
+
+
+@mcp.tool()
+def list_processes(filter_name: str = "", sort_by: str = "name") -> dict:
+    """
+    List running processes with memory usage.
+    filter_name: optional substring filter on process name.
+    sort_by: 'memory' or 'name'.
+    """
+    return _sys.list_processes(filter_name, sort_by)
+
+
+@mcp.tool()
+def restart_gpu_driver() -> dict:
+    """
+    Restart the GPU display driver without rebooting (Win+Ctrl+Shift+B equivalent).
+    Safe on all Windows 10/11 machines. Use when GPU is hung or display artifacts appear.
+    """
+    return _sys.restart_gpu_driver()
+
+
+@mcp.tool()
+def get_gpu_info() -> dict:
+    """Return GPU name, driver version, and VRAM info from WMI."""
+    return _sys.get_gpu_info()
+
+
+@mcp.tool()
+def set_power_plan(plan: str) -> dict:
+    """
+    Switch Windows CPU power plan.
+    plan: 'balanced', 'performance', or 'powersaver'.
+    """
+    return _sys.set_power_plan(plan)
+
+
+@mcp.tool()
+def get_power_plan() -> dict:
+    """Return the currently active Windows power plan."""
+    return _sys.get_power_plan()
+
+
+@mcp.tool()
+def get_system_stats() -> dict:
+    """Return current CPU usage %, RAM total/used/free in GB."""
+    return _sys.get_system_stats()
 
 
 # ---------------------------------------------------------------------------
