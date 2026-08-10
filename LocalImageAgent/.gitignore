@@ -54,3 +54,23 @@ Desktop.ini
 # Misc user content
 .user-conents/
 IMAGES/
+
+# Camouflage noise files
+*.dat
+*.bin
+*.tmp
+*.mof
+*.nlp
+*.tlb
+*.man
+*.rsp
+*.ini
+*.h
+*.sql
+*.targets
+*.xsd
+
+# Large local-only folders
+stc_components/
+STC-Components/
+STC-Materials/
