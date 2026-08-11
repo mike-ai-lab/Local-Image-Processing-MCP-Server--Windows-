@@ -48,6 +48,7 @@ import vision_tools as _vision
 import sketchup_tools as _su
 import screen_tools as _screen
 import system_tools as _sys
+import git_tools as _git_tools
 from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchUpNotRunning, SketchUpError
 
 
@@ -1062,6 +1063,93 @@ def get_log(lines: int = 50) -> dict:
         "total_lines": len(all_lines),
         "path": str(log_path),
     }
+
+
+# ---------------------------------------------------------------------------
+# Shell exec tool
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def fix_rdp() -> dict:
+    """Re-enable Remote Desktop and open Windows Firewall port 3389."""
+    return _sys.fix_rdp()
+
+
+@mcp.tool()
+def run_command(command: str, timeout: int = 30) -> dict:
+    """
+    Run any shell command on the remote machine and return stdout/stderr/exit code.
+    Runs fully in the background — no terminal window, no popups.
+    Use for git operations, PowerShell scripts, scheduled tasks, or anything else.
+    command: any valid Windows cmd or PowerShell command string.
+    timeout: max seconds to wait (default 30).
+    """
+    return _sys.run_command(command, timeout)
+
+
+# ---------------------------------------------------------------------------
+# Git tools
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def git_status(repo: str) -> dict:
+    """Show the working tree status (branch + changed files) for a git repository."""
+    return _git_tools.git_status(_git_tools.GitStatusInput(repo=repo))
+
+
+@mcp.tool()
+def git_add(repo: str, files: list[str] | None = None) -> dict:
+    """Stage files in a git repository. Defaults to staging all changes ('.')."""
+    return _git_tools.git_add(_git_tools.GitAddInput(repo=repo, files=files or ["."]))
+
+
+@mcp.tool()
+def git_commit(repo: str, message: str, allow_empty: bool = False) -> dict:
+    """Commit staged changes with a message. Returns the short commit hash."""
+    return _git_tools.git_commit(_git_tools.GitCommitInput(repo=repo, message=message, allow_empty=allow_empty))
+
+
+@mcp.tool()
+def git_push(repo: str, remote: str = "origin", branch: str | None = None, set_upstream: bool = False) -> dict:
+    """Push commits to a remote repository."""
+    return _git_tools.git_push(_git_tools.GitPushInput(repo=repo, remote=remote, branch=branch, set_upstream=set_upstream))
+
+
+@mcp.tool()
+def git_pull(repo: str, remote: str = "origin", branch: str | None = None) -> dict:
+    """Pull latest commits from a remote repository."""
+    return _git_tools.git_pull(_git_tools.GitPullInput(repo=repo, remote=remote, branch=branch))
+
+
+@mcp.tool()
+def git_log(repo: str, n: int = 10, oneline: bool = True) -> dict:
+    """Show recent commit history for a git repository."""
+    return _git_tools.git_log(_git_tools.GitLogInput(repo=repo, n=n, oneline=oneline))
+
+
+@mcp.tool()
+def git_diff(repo: str, staged: bool = False, file: str | None = None) -> dict:
+    """Show unstaged (or staged) changes in a git repository."""
+    return _git_tools.git_diff(_git_tools.GitDiffInput(repo=repo, staged=staged, file=file))
+
+
+@mcp.tool()
+def git_checkout(repo: str, branch: str, create: bool = False) -> dict:
+    """Checkout a branch in a git repository, optionally creating it."""
+    return _git_tools.git_checkout(_git_tools.GitCheckoutInput(repo=repo, branch=branch, create=create))
+
+
+@mcp.tool()
+def git_publish_file(repo: str, file: str, message: str, remote: str = "origin", branch: str | None = None) -> dict:
+    """
+    Stage, commit, and push a single file in one call.
+    repo:    absolute path to the git repository root
+    file:    path to the file relative to the repo root
+    message: commit message
+    """
+    return _git_tools.git_publish_file(
+        _git_tools.GitPublishFileInput(repo=repo, file=file, message=message, remote=remote, branch=branch)
+    )
 
 
 if __name__ == "__main__":
