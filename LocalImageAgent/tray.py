@@ -40,6 +40,7 @@ PYTHON   = BASE / ".venv" / "Scripts" / "python.exe"
 SERVER   = BASE / "src" / "main_http.py"
 BACKUP   = BASE / "src" / "main_http.py.backup"
 NGROK    = BASE / "ngrok" / "ngrok.exe"
+GRADIO   = BASE / "gradio_app.py"
 DOMAIN   = "pectin-parting-caution.ngrok-free.dev"
 MCP_URL  = f"https://{DOMAIN}/mcp"
 
@@ -48,6 +49,7 @@ MCP_URL  = f"https://{DOMAIN}/mcp"
 # ---------------------------------------------------------------------------
 _server_proc: subprocess.Popen | None = None
 _ngrok_proc:  subprocess.Popen | None = None
+_gradio_proc: subprocess.Popen | None = None
 _lock = threading.Lock()
 
 
@@ -172,6 +174,18 @@ def start_server() -> bool:
 
     # Save a good backup now that startup succeeded
     _save_backup()
+
+    # Start Gradio AI Studio
+    _kill_port(7860)
+    time.sleep(1)
+    with _lock:
+        _gradio_proc = subprocess.Popen(
+            [str(PYTHON), '-u', str(GRADIO)],
+            stdout=open(BASE / 'gradio.log', 'w'),
+            stderr=open(BASE / 'gradio_err.log', 'w'),
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+    logger.info('Gradio AI Studio started on port 7860')
     return True
 
 

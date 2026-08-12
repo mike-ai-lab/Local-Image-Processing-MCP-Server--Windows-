@@ -45,10 +45,51 @@ import tools as _tools
 import video_tools as _vtools
 import file_tools as _ftools
 import vision_tools as _vision
+import ai_tools as _ai
 import sketchup_tools as _su
 import screen_tools as _screen
 import system_tools as _sys
 from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchUpNotRunning, SketchUpError
+
+import os as _os
+from starlette.responses import FileResponse as _FileResponse, JSONResponse as _JSONResponse
+from starlette.requests import Request as _Request
+
+# Public folder - files here are served at /files/<filename> over HTTP
+_PUBLIC_DIR = r'C:\Users\PC\WinSvcHost.Runtime\LocalImageAgent\public'
+_os.makedirs(_PUBLIC_DIR, exist_ok=True)
+
+def _pub_out(input_file: str, suffix: str = "") -> tuple[str, str]:
+    """Return (output_path, public_url) for a file in the public/ folder.
+    Timestamp format: MMDD_HHMMSS  e.g. 0811_202139
+    """
+    import datetime as _dt
+    from pathlib import Path as _Path
+    ts = _dt.datetime.now().strftime("%m%d_%H%M%S")
+    src_stem = _Path(input_file).stem if input_file else "file"
+    src_ext  = suffix or (_Path(input_file).suffix if input_file else ".bin")
+    name     = f"{ts}_{src_stem}{src_ext}"
+    path     = _os.path.join(_PUBLIC_DIR, name)
+    url      = f"{_get_ngrok_url()}/files/{name}"
+    return path, url
+
+
+
+
+# ---------------------------------------------------------------------------
+# /files/ HTTP route - serve any file from the public/ folder
+# ---------------------------------------------------------------------------
+
+@mcp.custom_route("/files/{filename:path}", methods=["GET"])
+async def serve_file(request: _Request):
+    """Serve files from the public/ folder. Access via: https://<ngrok>/files/<filename>"""
+    filename = request.path_params["filename"]
+    file_path = _os.path.join(_PUBLIC_DIR, filename)
+    if not _os.path.isfile(file_path):
+        return _JSONResponse({"error": "not found", "file": filename}, status_code=404)
+    return _FileResponse(file_path)
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -56,9 +97,17 @@ from sketchup_bridge import run_ruby_json, run_ruby, send_named_command, SketchU
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def compress_image(input_file: str, output_file: str, quality: int | None = None, max_size_kb: int | None = None) -> dict:
+def compress_image(input_file: str, output_file: str = "", quality: int | None = None, max_size_kb: int | None = None) -> dict:
     """Compress a single image, optionally targeting a maximum file size (in KB)."""
-    return _tools.compress_image(_tools.CompressImageInput(input_file=input_file, output_file=output_file, quality=quality, max_size_kb=max_size_kb))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _tools.compress_image(_tools.CompressImageInput(input_file=input_file, output_file=output_file, quality=quality, max_size_kb=max_size_kb))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
 def compress_folder(input_folder: str, output_folder: str | None = None, recursive: bool = False, overwrite: bool = True, quality: int | None = None, max_size_kb: int | None = None) -> dict:
@@ -66,9 +115,17 @@ def compress_folder(input_folder: str, output_folder: str | None = None, recursi
     return _tools.compress_folder(_tools.CompressFolderInput(input_folder=input_folder, output_folder=output_folder, recursive=recursive, overwrite=overwrite, quality=quality, max_size_kb=max_size_kb))
 
 @mcp.tool()
-def resize_image(input_file: str, output_file: str, width: int | None = None, height: int | None = None, mode: str = "fit") -> dict:
+def resize_image(input_file: str, output_file: str = "", width: int | None = None, height: int | None = None, mode: str = "fit") -> dict:
     """Resize a single image. mode: fit | fill | exact."""
-    return _tools.resize_image(_tools.ResizeImageInput(input_file=input_file, output_file=output_file, width=width, height=height, mode=mode))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _tools.resize_image(_tools.ResizeImageInput(input_file=input_file, output_file=output_file, width=width, height=height, mode=mode))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
 def batch_resize(input_folder: str, output_folder: str | None = None, width: int | None = None, height: int | None = None, mode: str = "fit", recursive: bool = False, overwrite: bool = True) -> dict:
@@ -76,9 +133,17 @@ def batch_resize(input_folder: str, output_folder: str | None = None, width: int
     return _tools.batch_resize(_tools.BatchResizeInput(input_folder=input_folder, output_folder=output_folder, width=width, height=height, mode=mode, recursive=recursive, overwrite=overwrite))
 
 @mcp.tool()
-def convert_image(input_file: str, output_file: str) -> dict:
+def convert_image(input_file: str, output_file: str = "") -> dict:
     """Convert an image to another format. Target format is inferred from output_file extension."""
-    return _tools.convert_image(_tools.ConvertImageInput(input_file=input_file, output_file=output_file))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _tools.convert_image(_tools.ConvertImageInput(input_file=input_file, output_file=output_file))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
 def batch_convert(input_folder: str, output_folder: str, output_format: str, recursive: bool = False, overwrite: bool = True) -> dict:
@@ -86,9 +151,17 @@ def batch_convert(input_folder: str, output_folder: str, output_format: str, rec
     return _tools.batch_convert(_tools.BatchConvertInput(input_folder=input_folder, output_folder=output_folder, output_format=output_format, recursive=recursive, overwrite=overwrite))
 
 @mcp.tool()
-def strip_metadata(input_file: str, output_file: str) -> dict:
+def strip_metadata(input_file: str, output_file: str = "") -> dict:
     """Remove EXIF and other metadata from an image."""
-    return _tools.strip_metadata(_tools.StripMetadataInput(input_file=input_file, output_file=output_file))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _tools.strip_metadata(_tools.StripMetadataInput(input_file=input_file, output_file=output_file))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
 def image_info(input_file: str) -> dict:
@@ -96,9 +169,17 @@ def image_info(input_file: str) -> dict:
     return _tools.image_info(_tools.ImageInfoInput(input_file=input_file))
 
 @mcp.tool()
-def create_thumbnail(input_file: str, output_file: str, width: int = 256, height: int = 256) -> dict:
+def create_thumbnail(input_file: str, output_file: str = "", width: int = 256, height: int = 256) -> dict:
     """Generate a thumbnail preserving aspect ratio."""
-    return _tools.create_thumbnail(_tools.CreateThumbnailInput(input_file=input_file, output_file=output_file, width=width, height=height))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _tools.create_thumbnail(_tools.CreateThumbnailInput(input_file=input_file, output_file=output_file, width=width, height=height))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 
 # ---------------------------------------------------------------------------
@@ -120,29 +201,69 @@ def video_pipeline(input_file: str, output_file: str, steps: list[dict]) -> dict
     return _vtools.video_pipeline(_vtools.VideoPipelineInput(input_file=input_file, output_file=output_file, steps=steps))
 
 @mcp.tool()
-def compress_video(input_file: str, output_file: str, max_size_mb: float | None = None, crf: int = 23, preset: str = "medium", audio_bitrate_kbps: int = 128) -> dict:
+def compress_video(input_file: str, output_file: str = "", max_size_mb: float | None = None, crf: int = 23, preset: str = "medium", audio_bitrate_kbps: int = 128) -> dict:
     """Compress a video. Optionally target a maximum file size in MB using bitrate binary search."""
-    return _vtools.compress_video(_vtools.CompressVideoInput(input_file=input_file, output_file=output_file, max_size_mb=max_size_mb, crf=crf, preset=preset, audio_bitrate_kbps=audio_bitrate_kbps))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _vtools.compress_video(_vtools.CompressVideoInput(input_file=input_file, output_file=output_file, max_size_mb=max_size_mb, crf=crf, preset=preset, audio_bitrate_kbps=audio_bitrate_kbps))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
-def trim_video(input_file: str, output_file: str, start: str, end: str) -> dict:
+def trim_video(input_file: str, start: str, end: str, output_file: str = "") -> dict:
     """Trim a video to a time range. start/end accept HH:MM:SS, MM:SS, or plain seconds."""
-    return _vtools.trim_video(_vtools.TrimVideoInput(input_file=input_file, output_file=output_file, start=start, end=end))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _vtools.trim_video(_vtools.TrimVideoInput(input_file=input_file, output_file=output_file, start=start, end=end))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
-def strip_video_metadata(input_file: str, output_file: str) -> dict:
+def strip_video_metadata(input_file: str, output_file: str = "") -> dict:
     """Remove all metadata from a video file."""
-    return _vtools.strip_video_metadata(_vtools.StripVideoMetadataInput(input_file=input_file, output_file=output_file))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _vtools.strip_video_metadata(_vtools.StripVideoMetadataInput(input_file=input_file, output_file=output_file))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
-def adjust_video(input_file: str, output_file: str, speed: float = 1.0, interpolate_frames: bool = False, sharpen: float = 0.0) -> dict:
+def adjust_video(input_file: str, output_file: str = "", speed: float = 1.0, interpolate_frames: bool = False, sharpen: float = 0.0) -> dict:
     """Change video speed, add frame interpolation for smooth motion, and/or sharpen. speed: multiplier (3.0 = 3x faster)."""
-    return _vtools.adjust_video(_vtools.AdjustVideoInput(input_file=input_file, output_file=output_file, speed=speed, interpolate_frames=interpolate_frames, sharpen=sharpen))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _vtools.adjust_video(_vtools.AdjustVideoInput(input_file=input_file, output_file=output_file, speed=speed, interpolate_frames=interpolate_frames, sharpen=sharpen))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
-def optimize_for_social(input_file: str, output_file: str, platform: str = "instagram") -> dict:
+def optimize_for_social(input_file: str, output_file: str = "", platform: str = "instagram") -> dict:
     """Re-encode a video optimised for a social media platform: instagram, tiktok, youtube, twitter, facebook, linkedin."""
-    return _vtools.optimize_for_social(_vtools.OptimizeSocialInput(input_file=input_file, output_file=output_file, platform=platform))
+    if not output_file:
+        output_file, _pub_url = _pub_out(input_file)
+    else:
+        _pub_url = None
+
+    _result = _vtools.optimize_for_social(_vtools.OptimizeSocialInput(input_file=input_file, output_file=output_file, platform=platform))
+    if _pub_url:
+        _result["public_url"] = _pub_url
+    return _result
 
 @mcp.tool()
 def batch_optimize_social(input_folder: str, output_folder: str, platform: str = "instagram", recursive: bool = False, overwrite: bool = True) -> dict:
@@ -263,79 +384,84 @@ def magick(args: list[str]) -> dict:
 # Vision tools
 # ---------------------------------------------------------------------------
 
-@mcp.tool()
-def read_image_for_vision(path: str, size: int = 512, quality: int = 80) -> dict:
-    """
-    READ a single local image file and return it as base64 for visual inspection or analysis.
-    NEVER say a local file path is inaccessible — the MCP server runs on the user's machine
-    and can read any local path. Always call this tool when the user provides a file path.
-    Use read_image_for_generation instead when the user wants to generate a variation.
-    Default 512px / quality 80 keeps the payload small (~20-40 KB) so follow-up tool calls
-    (like sketchup_ruby) can run in the same turn without hitting token limits.
-    """
-    return _vision.read_image_for_vision(_vision.ReadImageForVisionInput(path=path, size=size, quality=quality))
 
-@mcp.tool()
-def read_image_for_generation(path: str, target_kb: int = 450, max_dimension: int = 1920) -> dict:
-    """
-    USE THIS TOOL whenever the user provides a local file path to an image and wants to see,
-    analyze, or generate a variation of it.
-
-    NEVER say "the file is not accessible" or ask the user to upload manually.
-    The MCP server runs on the user's local machine and reads any local path directly.
-
-    Workflow after this tool returns the base64 image:
-    1. You will SEE the image — study the scene: composition, lighting, colors, objects, style
-    2. Write a detailed text description of exactly what you see
-    3. Call your image generation tool (DALL-E) using ONLY a text prompt — describe the full
-       scene from step 2, then append the user's requested changes (e.g. "...but at night with
-       warm street lighting and 4-5 people walking in the foreground")
-    4. IMPORTANT: DALL-E here is text-to-image only — do NOT attempt to pass the base64 as
-       input to DALL-E. Describe the scene in text and generate from that description.
-
-    This produces the best results: you analyze the reference visually, then generate a fresh
-    image that matches the scene with the requested modifications applied.
-
-    target_kb: target WebP size in KB (default 450)
-    max_dimension: longest side in pixels (default 1920)
-    """
-    return _vision.read_image_for_generation(
-        _vision.ReadImageForGenerationInput(path=path, target_kb=target_kb, max_dimension=max_dimension)
-    )
+# --- DISABLED: read_image_for_vision (base64 tool - not needed) ---
+# @mcp.tool()
+# def read_image_for_vision(path: str, size: int = 512, quality: int = 80) -> dict:
+#     """
+#     READ a single local image file and return it as base64 for visual inspection or analysis.
+#     NEVER say a local file path is inaccessible — the MCP server runs on the user's machine
+#     and can read any local path. Always call this tool when the user provides a file path.
+#     Use read_image_for_generation instead when the user wants to generate a variation.
+#     Default 512px / quality 80 keeps the payload small (~20-40 KB) so follow-up tool calls
+#     (like sketchup_ruby) can run in the same turn without hitting token limits.
+#     """
+#     return _vision.read_image_for_vision(_vision.ReadImageForVisionInput(path=path, size=size, quality=quality))
 
 
-@mcp.tool()
-def read_folder_for_vision(
-    folder: str,
-    recursive: bool = False,
-    size: int = 800,
-    quality: int = 85,
-    max_images: int = 30,
-    modified_within_hours: float | None = None,
-    sort_by: str = "newest",
-) -> dict:
-    """
-    Read images in a folder and return each as a base64 JPEG thumbnail for vision analysis.
-    Always sorted and capped BEFORE encoding — never overloads the device regardless of folder size.
-    sort_by: newest (default) | oldest | name
-    modified_within_hours: e.g. 24 = only images from the last 24 hours
-    max_images: hard cap before encoding, default 30 (max 100).
-    Use for: renaming by content, finding images by scene/object/color, picking best shot.
-    """
-    return _vision.read_folder_for_vision(_vision.ReadFolderForVisionInput(
-        folder=folder, recursive=recursive,
-        size=size, quality=quality, max_images=max_images,
-        modified_within_hours=modified_within_hours, sort_by=sort_by,
-    ))
+# --- DISABLED: read_image_for_generation (base64 tool - not needed) ---
+# @mcp.tool()
+# def read_image_for_generation(path: str, target_kb: int = 450, max_dimension: int = 1920) -> dict:
+#     """
+#     USE THIS TOOL whenever the user provides a local file path to an image and wants to see,
+#     analyze, or generate a variation of it.
+# 
+#     NEVER say "the file is not accessible" or ask the user to upload manually.
+#     The MCP server runs on the user's local machine and reads any local path directly.
+# 
+#     Workflow after this tool returns the base64 image:
+#     1. You will SEE the image — study the scene: composition, lighting, colors, objects, style
+#     2. Write a detailed text description of exactly what you see
+#     3. Call your image generation tool (DALL-E) using ONLY a text prompt — describe the full
+#        scene from step 2, then append the user's requested changes (e.g. "...but at night with
+#        warm street lighting and 4-5 people walking in the foreground")
+#     4. IMPORTANT: DALL-E here is text-to-image only — do NOT attempt to pass the base64 as
+#        input to DALL-E. Describe the scene in text and generate from that description.
+# 
+#     This produces the best results: you analyze the reference visually, then generate a fresh
+#     image that matches the scene with the requested modifications applied.
+# 
+#     target_kb: target WebP size in KB (default 450)
+#     max_dimension: longest side in pixels (default 1920)
+#     """
+#     return _vision.read_image_for_generation(
+#         _vision.ReadImageForGenerationInput(path=path, target_kb=target_kb, max_dimension=max_dimension)
+#     )
+# 
 
 
-# ---------------------------------------------------------------------------
-# Screen capture tool
-# ---------------------------------------------------------------------------
+# --- DISABLED: read_folder_for_vision (base64 tool - not needed) ---
+# @mcp.tool()
+# def read_folder_for_vision(
+#     folder: str,
+#     recursive: bool = False,
+#     size: int = 800,
+#     quality: int = 85,
+#     max_images: int = 30,
+#     modified_within_hours: float | None = None,
+#     sort_by: str = "newest",
+# ) -> dict:
+#     """
+#     Read images in a folder and return each as a base64 JPEG thumbnail for vision analysis.
+#     Always sorted and capped BEFORE encoding — never overloads the device regardless of folder size.
+#     sort_by: newest (default) | oldest | name
+#     modified_within_hours: e.g. 24 = only images from the last 24 hours
+#     max_images: hard cap before encoding, default 30 (max 100).
+#     Use for: renaming by content, finding images by scene/object/color, picking best shot.
+#     """
+#     return _vision.read_folder_for_vision(_vision.ReadFolderForVisionInput(
+#         folder=folder, recursive=recursive,
+#         size=size, quality=quality, max_images=max_images,
+#         modified_within_hours=modified_within_hours, sort_by=sort_by,
+#     ))
+# 
+# 
+# # ---------------------------------------------------------------------------
+# # Screen capture tool
+# # ---------------------------------------------------------------------------
 
 @mcp.tool()
 def capture_screen(
-    output_file: str,
     monitor: int = 0,
 ):
     """
@@ -346,12 +472,51 @@ def capture_screen(
     monitor: 0 = all monitors (virtual desktop), 1 = primary, 2 = secondary, etc.
     return_base64: if true, also returns the image inline so it can be shown in chat.
     """
+    import datetime as _dt
+    ts = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+    pub_file = _os.path.join(_PUBLIC_DIR, f"snapshot_{ts}.png")
+    ngrok_url = _get_ngrok_url()
+    pub_url = f"{ngrok_url}/files/snapshot_{ts}.png"
+    logger.info("capture_screen -> %s", pub_url)
     return _screen.capture_screen(
-        _screen.CaptureScreenInput(
-            output_file=output_file,
-            monitor=monitor,
-        )
+        _screen.CaptureScreenInput(output_file=pub_file, monitor=monitor)
     )
+
+
+# ---------------------------------------------------------------------------
+# AI tools — OpenCV NLM denoise + Real-ESRGAN upscale
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def ai_denoise(input_file: str, output_file: str, strength: str = "medium") -> dict:
+    """
+    Denoise an image using OpenCV Non-Local Means (NLM) — proper AI-grade denoising,
+    not a blur. Much better than Gaussian for render noise removal.
+    strength: low | medium | high
+    """
+    return _ai.ai_denoise(_ai.AiDenoiseInput(input_file=input_file, output_file=output_file, strength=strength))
+
+@mcp.tool()
+def ai_upscale(input_file: str, output_file: str, scale: int = 2, model: str = "RealESRGAN_x4plus") -> dict:
+    """
+    Upscale an image using Real-ESRGAN neural network — runs on the NVIDIA GPU (CUDA).
+    Produces sharp, artifact-free results vs Lanczos interpolation.
+    scale: 2 or 4  |  model: RealESRGAN_x4plus | RealESRGAN_x2plus | RealESRGAN_x4plus_anime_6B
+    First run downloads model weights (~64MB) to C:/Users/PC/.cache/realesrgan/
+    """
+    return _ai.ai_upscale(_ai.AiUpscaleInput(input_file=input_file, output_file=output_file, scale=scale, model=model))
+
+@mcp.tool()
+def ai_process_pipeline(input_file: str, output_file: str, denoise_strength: str = "medium", upscale: int = 2, model: str = "RealESRGAN_x4plus") -> dict:
+    """
+    Full AI pipeline: NLM denoise → Real-ESRGAN upscale in one call.
+    Use this for render post-processing. Runs on NVIDIA GPU.
+    denoise_strength: low | medium | high  |  upscale: 2 or 4
+    """
+    return _ai.ai_process_pipeline(_ai.AiProcessPipelineInput(
+        input_file=input_file, output_file=output_file,
+        denoise_strength=denoise_strength, upscale=upscale, model=model
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -1082,65 +1247,112 @@ def get_log(lines: int = 50) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Server restart tool - uses Task Scheduler so the response returns first
+# File transfer tool
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def restart_server(delay_seconds: int = 3) -> dict:
+def transfer_file(action: str, local_path: str, url: str = "", filename: str = "") -> dict:
     """
-    Restart this MCP server safely by scheduling a Task Scheduler job that fires
-    after delay_seconds. The tool returns immediately so the MCP response is
-    delivered before the process is killed - no connection hang.
+    Bidirectional file transfer via the /files/ HTTP endpoint.
 
-    delay_seconds: how long to wait before restarting (default 3, minimum 2).
+    action='upload': copies local_path to public/ folder and returns a public URL.
+        - Keeps the original filename exactly as-is.
+        - URL is properly encoded so spaces and special chars work in browsers.
+        - The file is served immediately. Clean up with action='cleanup' when done.
+        filename: optional rename (default: same as source filename).
+
+    action='download': fetches a URL and saves it to local_path on this machine.
+        url: the URL to fetch from.
+
+    action='cleanup': deletes a file from the public/ folder by filename.
+        filename: the filename to remove from public/.
     """
-    import subprocess
-    import sys
-    import os
-    from datetime import datetime, timedelta
+    import shutil
+    import urllib.request as _req
+    from urllib.parse import quote as _quote
+    ngrok_url = _get_ngrok_url()
 
-    delay_seconds = max(2, delay_seconds)
+    if action == "upload":
+        src = _os.path.abspath(local_path)
+        if not _os.path.exists(src):
+            return {"status": "error", "detail": f"File not found: {src}"}
+        dest_name = filename if filename else _os.path.basename(src)
+        dest_path = _os.path.join(_PUBLIC_DIR, dest_name)
+        shutil.copy2(src, dest_path)
+        # URL-encode filename so spaces/special chars work in browsers
+        encoded_name = _quote(dest_name)
+        pub_url = f"{ngrok_url}/files/{encoded_name}"
+        logger.info("transfer_file upload: %s -> %s", src, pub_url)
+        return {
+            "status": "ok",
+            "action": "upload",
+            "filename": dest_name,
+            "public_url": pub_url,
+        }
 
-    python_exe  = sys.executable
-    script_path = os.path.abspath(__file__)
-    work_dir    = os.path.dirname(script_path)
+    elif action == "download":
+        if not url:
+            return {"status": "error", "detail": "url is required for download"}
+        dest = _os.path.abspath(local_path)
+        _os.makedirs(_os.path.dirname(dest) or ".", exist_ok=True)
+        _req.urlretrieve(url, dest)
+        size_kb = round(_os.path.getsize(dest) / 1024, 1)
+        logger.info("transfer_file download: %s -> %s", url, dest)
+        return {"status": "ok", "action": "download", "url": url, "local_path": dest, "size_kb": size_kb}
 
-    # Schedule a one-shot task N seconds from now
-    run_at = (datetime.now() + timedelta(seconds=delay_seconds)).strftime("%H:%M:%S")
+    elif action == "cleanup":
+        if not filename:
+            return {"status": "error", "detail": "filename is required for cleanup"}
+        target = _os.path.join(_PUBLIC_DIR, filename)
+        if _os.path.exists(target):
+            _os.remove(target)
+            return {"status": "ok", "action": "cleanup", "removed": filename}
+        return {"status": "not_found", "filename": filename}
 
-    # The action: kill current PID then launch fresh process
-    pid = os.getpid()
-    ps_cmd = (
-        f"Stop-Process -Id {pid} -Force -ErrorAction SilentlyContinue; "
-        f"Start-Sleep -Seconds 1; "
-        f"Start-Process -FilePath '{python_exe}' "
-        f"-ArgumentList '{script_path}' "
-        f"-WorkingDirectory '{work_dir}' "
-        f"-WindowStyle Hidden"
-    )
+    return {"status": "error", "detail": f"Unknown action '{action}'. Use: upload, download, cleanup."}
 
-    # Register as a one-time scheduled task
-    task_name = "LocalImageAgent_Restart"
-    schtasks_cmd = [
-        "schtasks", "/create", "/f",
-        "/tn", task_name,
-        "/tr", f"powershell -WindowStyle Hidden -Command "{ps_cmd}"",
-        "/sc", "once",
-        "/st", run_at,
-        "/ru", "SYSTEM",
-    ]
 
-    result = subprocess.run(schtasks_cmd, capture_output=True, text=True)
+# ---------------------------------------------------------------------------
 
-    if result.returncode != 0:
-        return {"status": "error", "detail": result.stderr.strip()}
+@mcp.tool()
+def transfer_file(action: str, local_path: str, url: str = "", filename: str = "") -> dict:
+    """
+    Bidirectional file transfer via the /files/ HTTP endpoint.
 
-    return {
-        "status": "ok",
-        "message": f"Server will restart in {delay_seconds}s via Task Scheduler.",
-        "scheduled_at": run_at,
-        "pid": pid,
-    }
+    action='upload': copies local_path to public/ folder, returns a public URL
+        you can open in any browser or share with any AI (ChatGPT, Gemini, etc).
+        filename: optional rename (default: same as source filename).
+
+    action='download': fetches a URL and saves it to local_path on this machine.
+        url: the URL to fetch from.
+    """
+    import shutil
+    import urllib.request as _req
+    ngrok_url = _get_ngrok_url()
+
+    if action == "upload":
+        src = _os.path.abspath(local_path)
+        if not _os.path.exists(src):
+            return {"status": "error", "detail": f"File not found: {src}"}
+        dest_name = filename if filename else _os.path.basename(src)
+        dest_path = _os.path.join(_PUBLIC_DIR, dest_name)
+        shutil.copy2(src, dest_path)
+        pub_url = f"{ngrok_url}/files/{dest_name}"
+        logger.info("transfer_file upload: %s -> %s", src, pub_url)
+        return {"status": "ok", "action": "upload", "local_path": src, "public_url": pub_url, "filename": dest_name}
+
+    elif action == "download":
+        if not url:
+            return {"status": "error", "detail": "url is required for download"}
+        dest = _os.path.abspath(local_path)
+        _os.makedirs(_os.path.dirname(dest) or ".", exist_ok=True)
+        _req.urlretrieve(url, dest)
+        size_kb = round(_os.path.getsize(dest) / 1024, 1)
+        logger.info("transfer_file download: %s -> %s", url, dest)
+        return {"status": "ok", "action": "download", "url": url, "local_path": dest, "size_kb": size_kb}
+
+    return {"status": "error", "detail": f"Unknown action '{action}'. Use 'upload' or 'download'."}
+
 
 if __name__ == "__main__":
     HOST = "127.0.0.1"
