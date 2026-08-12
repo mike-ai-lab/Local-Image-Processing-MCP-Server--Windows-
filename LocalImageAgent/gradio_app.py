@@ -258,8 +258,8 @@ if __name__ == "__main__":
     print(f"AI Image Studio  |  {gpu}  |  models: {len(COMMUNITY_MODELS)}")
     demo.launch(
         server_name="0.0.0.0",
-        server_port=7860,
-        share=True,
+        server_port=7861,
+        share=False,
         show_error=True,
         allowed_paths=[str(OUTPUT_DIR)],
         css=DARK_CSS,
